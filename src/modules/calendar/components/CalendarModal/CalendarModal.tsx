@@ -5,7 +5,6 @@ import {
   FormErrorMessage,
   FormLabel,
 } from '@chakra-ui/form-control';
-import { useDisclosure } from '@chakra-ui/hooks';
 import { Input } from '@chakra-ui/input';
 import { Divider } from '@chakra-ui/layout';
 import {
@@ -20,8 +19,7 @@ import { Textarea } from '@chakra-ui/textarea';
 import { addHours, addMinutes, format, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
 import Form from 'src/modules/shared/components/Form';
-
-interface CalendarModalProps {}
+import { useCalendarModalState } from '../../providers/ModalStateProvider';
 
 const baseDate = parse(
   format(new Date(), 'yyyy-MM-d HH:00'),
@@ -41,8 +39,8 @@ const dateTimeToString = (datetime: Date): string => {
   return format(datetime, "yyyy-MM-dd'T'HH:mm");
 };
 
-const CalendarModal: React.FC<CalendarModalProps> = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+const CalendarModal: React.FC = () => {
+  const { isOpen, closeModal } = useCalendarModalState();
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
 
@@ -111,9 +109,7 @@ const CalendarModal: React.FC<CalendarModalProps> = () => {
 
   return (
     <>
-      <Button onClick={onOpen}>Open Modal</Button>
-
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Nuevo evento</ModalHeader>

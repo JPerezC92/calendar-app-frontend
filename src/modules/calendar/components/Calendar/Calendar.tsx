@@ -1,47 +1,21 @@
 import { CSSProperties, useState } from 'react';
 import { Box } from '@chakra-ui/layout';
-import { addHours } from 'date-fns';
 import {
   Calendar as ReactBigCalendar,
   CalendarProps,
-  dateFnsLocalizer,
-  Event,
   View,
 } from 'react-big-calendar';
-
-import { format, parse, getDay, startOfWeek } from 'date-fns';
-import es from 'date-fns/locale/es';
-// import enUs from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+
 import { messages } from 'src/modules/common/utils/calendar-messages-es';
-import CalendarEvent from '../CalendarEvent';
 import { ApplicationSide } from 'src/modules/shared/utils/ApplicationSide';
+import CalendarEvent from '../CalendarEvent';
 import CalendarModal from '../CalendarModal';
-
-const locales = {
-  es: es,
-};
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
-
-const myEventsList = [
-  {
-    title: 'Cumpleaños',
-    start: new Date(),
-    end: addHours(new Date(), 5),
-    bgColor: 'red',
-    // user: {
-    //   _id: "123",
-    //   name: "John",
-    // },
-  },
-];
+import { useCalendarModalState } from '../../providers/ModalStateProvider';
+import { useCalendarEventState } from '../../providers';
+import CreateCalendarEventFAB from '../CreateCalendarEventFAB';
+import { calendarEventAction } from '../../reducers/calendarEvent';
+import { localizer } from './localizer';
 
 const Calendar = () => {
   const [lastView, setLastView] = useState<View>(
@@ -50,13 +24,24 @@ const Calendar = () => {
       : 'month'
   );
 
-  const onDoubleClickEvent: CalendarProps['onDoubleClickEvent'] = (
-    event: Event
-  ) => {
-    console.log(event);
+  const calendarModalState = useCalendarModalState();
+  const calendarEvent = useCalendarEventState();
+
+  const onDoubleClickEvent: CalendarProps['onDoubleClickEvent'] = () => {
+    calendarModalState.openModal();
   };
 
-  const onSelectEvent: CalendarProps['onSelectEvent'] = () => {};
+  const onSelectEvent: CalendarProps['onSelectEvent'] = (event) => {
+    console.log(event);
+    calendarEvent.dispatch(
+      calendarEventAction.setEventSelected({
+        title: event.title ? event.title : '',
+        start: event.start ? event.start : new Date(),
+        end: event.end ? event.end : new Date(),
+      })
+    );
+  };
+
   const onViewChange: CalendarProps['onView'] = (event) => {
     setLastView(() => event);
     window.localStorage.setItem('lastView', event);
@@ -68,7 +53,7 @@ const Calendar = () => {
     end,
     isSelected
   ) => {
-    let newStyle: CSSProperties = {
+    const newStyle: CSSProperties = {
       backgroundColor: '#367CF7',
       borderRadius: '0px',
       color: 'white',
@@ -87,7 +72,7 @@ const Calendar = () => {
         <ReactBigCalendar
           localizer={localizer}
           culture="es"
-          events={myEventsList}
+          events={calendarEvent.events}
           startAccessor="start"
           endAccessor="end"
           messages={messages}
@@ -100,6 +85,7 @@ const Calendar = () => {
             event: CalendarEvent,
           }}
         />
+        <CreateCalendarEventFAB onClick={calendarModalState.openModal} />
         <CalendarModal />
       </Box>
     </>
