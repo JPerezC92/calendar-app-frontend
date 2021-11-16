@@ -2,22 +2,25 @@ import { CSSProperties, useState } from 'react';
 import { Box } from '@chakra-ui/layout';
 import {
   Calendar as ReactBigCalendar,
-  CalendarProps,
+  CalendarProps as RBCalendarProps,
   View,
 } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import { messages } from 'src/modules/common/utils/calendar-messages-es';
 import { ApplicationSide } from 'src/modules/shared/utils/ApplicationSide';
-import CalendarEvent from '../CalendarEvent';
+import EventReminder from '../EventReminder';
 import CalendarModal from '../CalendarModal';
 import { useCalendarModalState } from '../../providers/ModalStateProvider';
 import { useCalendarEventState } from '../../providers';
 import CreateCalendarEventFAB from '../CreateCalendarEventFAB';
 import { calendarEventAction } from '../../reducers/calendarEvent';
 import { localizer } from './localizer';
+import type { CalendarEvent } from '../../types';
 
-const Calendar = () => {
+type ReactBigCalendarProps = RBCalendarProps<CalendarEvent>;
+
+const Calendar: React.FC = () => {
   const [lastView, setLastView] = useState<View>(
     ApplicationSide.isBrowser
       ? (localStorage.getItem('lastView') as View) || 'month'
@@ -25,29 +28,27 @@ const Calendar = () => {
   );
 
   const calendarModalState = useCalendarModalState();
-  const calendarEvent = useCalendarEventState();
+  const calendarEventState = useCalendarEventState();
 
-  const onDoubleClickEvent: CalendarProps['onDoubleClickEvent'] = () => {
-    calendarModalState.openModal();
-  };
+  const onDoubleClickEvent: ReactBigCalendarProps['onDoubleClickEvent'] =
+    () => {
+      calendarModalState.openModal();
+    };
 
-  const onSelectEvent: CalendarProps['onSelectEvent'] = (event) => {
-    console.log(event);
-    calendarEvent.dispatch(
+  const onSelectEvent: ReactBigCalendarProps['onSelectEvent'] = (event) => {
+    calendarEventState.dispatch(
       calendarEventAction.setEventSelected({
-        title: event.title ? event.title : '',
-        start: event.start ? event.start : new Date(),
-        end: event.end ? event.end : new Date(),
+        ...event,
       })
     );
   };
 
-  const onViewChange: CalendarProps['onView'] = (event) => {
+  const onViewChange: ReactBigCalendarProps['onView'] = (event) => {
     setLastView(() => event);
     window.localStorage.setItem('lastView', event);
   };
 
-  const eventStyleGetter: CalendarProps['eventPropGetter'] = (
+  const eventStyleGetter: ReactBigCalendarProps['eventPropGetter'] = (
     event,
     start,
     end,
@@ -72,7 +73,7 @@ const Calendar = () => {
         <ReactBigCalendar
           localizer={localizer}
           culture="es"
-          events={calendarEvent.events}
+          events={calendarEventState.events}
           startAccessor="start"
           endAccessor="end"
           messages={messages}
@@ -82,11 +83,26 @@ const Calendar = () => {
           onSelectEvent={onSelectEvent}
           view={lastView}
           components={{
-            event: CalendarEvent,
+            event: EventReminder,
           }}
         />
         <CreateCalendarEventFAB onClick={calendarModalState.openModal} />
-        <CalendarModal />
+
+        {calendarModalState.isOpen && (
+          <CalendarModal
+            calendarEvent={calendarEventState.eventSelected}
+            onDestroy={() =>
+              calendarEventState.dispatch(
+                calendarEventAction.removeEventSelected()
+              )
+            }
+            save={(newCalendarEvent) => {
+              calendarEventState.dispatch(
+                calendarEventAction.addNewEvent(newCalendarEvent)
+              );
+            }}
+          />
+        )}
       </Box>
     </>
   );

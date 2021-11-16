@@ -15,6 +15,21 @@ export const calendarEventReducer = (
         eventSelected: action.payload,
       };
 
+    case CalendarEventActionEnum.REMOVE_EVENT_SELECTED:
+      return {
+        ...state,
+        eventSelected: undefined,
+      };
+
+    case CalendarEventActionEnum.ADD_NEW_EVENT:
+      return {
+        ...state,
+        events: [
+          ...state.events,
+          { ...action.payload, id: state.events.length + 1 },
+        ],
+      };
+
     case CalendarEventActionEnum.SET_EVENTS:
       return {
         ...state,

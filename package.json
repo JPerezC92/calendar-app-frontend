@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "gen:theme-typings": "npx @chakra-ui/cli tokens src/modules/ui/theme.ts",
+    "debugger": "NODE_OPTIONS='--inspect' next dev",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

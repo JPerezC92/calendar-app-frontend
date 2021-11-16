@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useState } from 'react';
+import React, { ChangeEventHandler, useEffect } from 'react';
 import { Button } from '@chakra-ui/button';
 import {
   FormControl,
@@ -20,16 +20,18 @@ import { addHours, addMinutes, format, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
 import Form from 'src/modules/shared/components/Form';
 import { useCalendarModalState } from '../../providers/ModalStateProvider';
+import { CalendarEvent, NewCalendarEvent } from '../../types';
+import { useForm } from 'src/modules/shared/hooks';
 
 const baseDate = parse(
-  format(new Date(), 'yyyy-MM-d HH:00'),
-  'yyyy-MM-d HH:mm',
+  format(new Date(), 'yyyy-MM-dd HH:00:00'),
+  'yyyy-MM-dd HH:mm:ss',
   new Date()
 );
 
 const initialStartDate = addHours(baseDate, 1);
 const initialEndDate = addHours(baseDate, 2);
-const minEndDate = addMinutes(initialStartDate, 5);
+const minEndDate = (startDate: Date) => addMinutes(startDate, 5);
 
 const dateTimeStringToDate = (datetimeString: string): Date => {
   return parse(datetimeString, "yyyy-MM-dd'T'HH:mm", new Date());
@@ -39,73 +41,58 @@ const dateTimeToString = (datetime: Date): string => {
   return format(datetime, "yyyy-MM-dd'T'HH:mm");
 };
 
-const CalendarModal: React.FC = () => {
+interface CalendarModalProps {
+  save(newCalendarEvent: NewCalendarEvent): void;
+  calendarEvent?: CalendarEvent;
+  onDestroy?: () => void;
+}
+
+const newCalendarEventInitialState: NewCalendarEvent = {
+  title: '',
+  notes: '',
+  start: initialStartDate,
+  end: initialEndDate,
+};
+
+const CalendarModal: React.FC<CalendarModalProps> = ({
+  save,
+  calendarEvent,
+  onDestroy,
+}) => {
+  const { formValues, formErrors, isValid, setFormValue, handleInputChange } =
+    useForm<NewCalendarEvent>(
+      calendarEvent ? calendarEvent : newCalendarEventInitialState
+    );
+
   const { isOpen, closeModal } = useCalendarModalState();
-  const [startDate, setStartDate] = useState(initialStartDate);
-  const [endDate, setEndDate] = useState(initialEndDate);
-
-  const [formValues, setFormValues] = useState({
-    title: 'Evento',
-    notes: '',
-    startDate: dateTimeToString(startDate),
-    endDate: dateTimeToString(endDate),
-  });
-
-  const [formErrors, setFormErrors] = useState({
-    title: '',
-    notes: '',
-    startDate: '',
-    endDate: '',
-  });
-
-  const formHasErrors = Object.values(formErrors).some((value) => value !== '');
-
-  const handleInputChange: ChangeEventHandler<
-    HTMLInputElement | HTMLTextAreaElement
-  > = (event) => {
-    const { name, value } = event.target;
-
-    setFormValues({ ...formValues, [name]: value.trim() });
-
-    if (value === undefined || value === '') {
-      setFormErrors({ ...formErrors, [name]: 'Este campo es obligatorio' });
-    } else {
-      setFormErrors({ ...formErrors, [name]: '' });
-    }
-  };
 
   const handleStartDateChange: ChangeEventHandler<HTMLInputElement> = (
     event
   ) => {
-    const { value, validity, validationMessage } = event.target;
-
+    const { value, validity } = event.target;
     if (validity.valid) {
-      setStartDate(() => dateTimeStringToDate(value));
-      setFormValues({ ...formValues, startDate: value });
-    }
-
-    if (!validity.valid) {
-      setFormErrors({ ...formErrors, startDate: validationMessage });
-    } else {
-      setFormErrors({ ...formErrors, startDate: '' });
+      setFormValue({ start: dateTimeStringToDate(value) });
     }
   };
 
   const handleEndDateChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    const { value, validity, validationMessage } = event.target;
+    const { value, validity } = event.target;
 
     if (validity.valid) {
-      setEndDate(() => dateTimeStringToDate(value));
-      setFormValues({ ...formValues, endDate: value });
-    }
-
-    if (!validity.valid) {
-      setEndDate(() => minEndDate);
-      setFormErrors({ ...formErrors, endDate: validationMessage });
-    } else {
-      setFormErrors({ ...formErrors, endDate: '' });
+      setFormValue({ end: dateTimeStringToDate(value) });
     }
   };
+
+  useEffect(() => {
+    if (formValues.end.getTime() < formValues.start.getTime()) {
+      setFormValue({ end: minEndDate(formValues.start) });
+    }
+  }, [formValues.start, formValues.end, setFormValue]);
+
+  useEffect(
+    () => () => onDestroy && calendarEvent && onDestroy(),
+    [onDestroy, calendarEvent]
+  );
 
   return (
     <>
@@ -124,48 +111,47 @@ const CalendarModal: React.FC = () => {
                 marginBlock={3}
                 onSubmit={(event) => {
                   event.preventDefault();
-                  // console.log(formValues);
+                  save(formValues);
                 }}
                 SubmitButton={
                   <Button
                     variant="outline"
                     colorScheme="blue"
                     type="submit"
-                    isDisabled={formHasErrors}
+                    isDisabled={!isValid}
                     leftIcon={<FaSave fontSize={20} />}
                   >
                     Guardar
                   </Button>
                 }
               >
-                <FormControl
-                  isInvalid={Boolean(formErrors.startDate)}
-                  isRequired
-                >
+                <FormControl isInvalid={Boolean(formErrors.start)} isRequired>
                   <FormLabel>Fecha y hora inicio</FormLabel>
                   <Input
-                    defaultValue={formValues.startDate}
+                    name="start"
+                    value={dateTimeToString(formValues.start)}
                     isRequired
                     onChange={handleStartDateChange}
                     placeholder="Fecha inicio"
                     required
                     type="datetime-local"
                   />
-                  <FormErrorMessage>{formErrors.startDate}</FormErrorMessage>
+                  <FormErrorMessage>{formErrors.start}</FormErrorMessage>
                 </FormControl>
 
-                <FormControl isInvalid={Boolean(formErrors.endDate)} isRequired>
+                <FormControl isInvalid={Boolean(formErrors.end)} isRequired>
                   <FormLabel>Fecha y hora fin</FormLabel>
                   <Input
-                    defaultValue={formValues.endDate}
+                    name="end"
+                    value={dateTimeToString(formValues.end)}
                     isRequired
-                    min={dateTimeToString(minEndDate)}
+                    min={dateTimeToString(minEndDate(formValues.start))}
                     onChange={handleEndDateChange}
                     placeholder="Fecha fin"
                     required
                     type="datetime-local"
                   />
-                  <FormErrorMessage>{formErrors.endDate}</FormErrorMessage>
+                  <FormErrorMessage>{formErrors.end}</FormErrorMessage>
                 </FormControl>
 
                 <Divider />
@@ -178,7 +164,8 @@ const CalendarModal: React.FC = () => {
                     name="title"
                     autoComplete="off"
                     onChange={handleInputChange}
-                    defaultValue={formValues.title}
+                    onBlur={handleInputChange}
+                    value={formValues.title}
                     isRequired
                   />
                   <FormErrorMessage>{formErrors.title}</FormErrorMessage>
@@ -193,7 +180,7 @@ const CalendarModal: React.FC = () => {
                     placeholder="Notas"
                     rows={5}
                     name="notes"
-                    defaultValue={formValues.notes}
+                    value={formValues.notes}
                     onChange={handleInputChange}
                     isRequired
                   />

@@ -1,11 +1,10 @@
 import React from 'react';
 import { EventProps } from 'react-big-calendar';
+import { CalendarEvent } from '../../types';
 
-interface CalendarEventProps {}
+// interface EventReminderProps {}
 
-const CalendarEvent: React.FC<EventProps & CalendarEventProps> = ({
-  event,
-}) => {
+const EventReminder: React.FC<EventProps<CalendarEvent>> = ({ event }) => {
   // TODO user type passtrougth
   const { title } = event;
   return (
@@ -16,4 +15,4 @@ const CalendarEvent: React.FC<EventProps & CalendarEventProps> = ({
   );
 };
 
-export default CalendarEvent;
+export default EventReminder;

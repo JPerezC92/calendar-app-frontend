@@ -1,5 +1,4 @@
-export interface CalendarEvent {
-  id: number;
+export interface NewCalendarEvent {
   title: string;
   notes?: string;
   start: Date;

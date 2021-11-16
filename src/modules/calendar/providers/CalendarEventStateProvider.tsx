@@ -13,19 +13,20 @@ import { CalendarEvent } from '../types';
 
 export interface CalendarEventState {
   events: CalendarEvent[];
-  eventSelected: CalendarEvent | NotSelected;
+  eventSelected?: CalendarEvent;
   dispatch: Dispatch<ReducerAction<typeof calendarEventReducer>>;
 }
 
 const initialCalendarEventState: CalendarEventState = {
   events: [
     {
+      id: 1,
       title: 'Cumpleaños',
       start: new Date(),
       end: addHours(new Date(), 5),
     },
   ],
-  eventSelected: false,
+  eventSelected: undefined,
   dispatch: (state) => state,
 };
 
