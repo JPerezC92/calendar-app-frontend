@@ -13,7 +13,7 @@ interface UseForm {
     handleInputChange(
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ): void;
-    setFormValue<Key extends keyof FormValues>(
+    setFormValues<Key extends keyof FormValues>(
       newFormValues: Record<Key, FormValues[Key]>
     ): void;
     setFormError(formError: FormError<FormValues>): void;
@@ -68,7 +68,7 @@ export const useForm: UseForm = (initialStateValues) => {
     setValues((prevState) => ({ ...prevState, [name.trim()]: value }));
   };
 
-  const setFormValue: UseFormResult['setFormValue'] = (newFormValues) => {
+  const setFormValues: UseFormResult['setFormValues'] = (newFormValues) => {
     setValues((prevState) => ({
       ...prevState,
       ...newFormValues,
@@ -84,7 +84,7 @@ export const useForm: UseForm = (initialStateValues) => {
     formErrors,
     isValid,
     handleInputChange,
-    setFormValue,
+    setFormValues,
     setFormError,
     reset,
     setNewformValues,

@@ -1,18 +1,24 @@
 import { CalendarEvent, NewCalendarEvent } from '../../types';
 
 export enum CalendarEventActionEnum {
+  SET_EVENTS = 'SET_EVENTS',
   SET_EVENT_SELECTED = 'SET_EVENT_SELECTED',
   REMOVE_EVENT_SELECTED = 'REMOVE_EVENT_SELECTED',
-  SET_EVENTS = 'SET_EVENTS',
   ADD_NEW_EVENT = 'ADD_NEW_EVENT',
+  UPDATE_EVENT = 'UPDATE_EVENT',
 }
 
 export type CalendarEventAction =
-  | SetEventSelected
-  | AddNewEvent
   | SetEvents
-  | RemoveEventSelected;
+  | SetEventSelected
+  | RemoveEventSelected
+  | AddNewEvent
+  | UpdateEvent;
 
+export interface SetEvents {
+  type: CalendarEventActionEnum.SET_EVENTS;
+  payload: CalendarEvent[];
+}
 export interface SetEventSelected {
   type: CalendarEventActionEnum.SET_EVENT_SELECTED;
   payload: CalendarEvent;
@@ -24,7 +30,7 @@ export interface AddNewEvent {
   type: CalendarEventActionEnum.ADD_NEW_EVENT;
   payload: NewCalendarEvent;
 }
-export interface SetEvents {
-  type: CalendarEventActionEnum.SET_EVENTS;
-  payload: CalendarEvent[];
+export interface UpdateEvent {
+  type: CalendarEventActionEnum.UPDATE_EVENT;
+  payload: CalendarEvent;
 }

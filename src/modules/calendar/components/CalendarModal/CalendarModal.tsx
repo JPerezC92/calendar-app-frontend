@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useEffect } from 'react';
+import React, { ChangeEventHandler, FormEventHandler, useEffect } from 'react';
 import { Button } from '@chakra-ui/button';
 import {
   FormControl,
@@ -18,10 +18,12 @@ import {
 import { Textarea } from '@chakra-ui/textarea';
 import { addHours, addMinutes, format, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
+
 import Form from 'src/modules/shared/components/Form';
-import { useCalendarModalState } from '../../providers/ModalStateProvider';
-import { CalendarEvent, NewCalendarEvent } from '../../types';
 import { useForm } from 'src/modules/shared/hooks';
+import { useCalendarEventState, useCalendarModalState } from '../../providers';
+import { NewCalendarEvent } from '../../types';
+import { calendarEventAction } from '../../reducers/calendarEvent';
 
 const baseDate = parse(
   format(new Date(), 'yyyy-MM-dd HH:00:00'),
@@ -41,12 +43,6 @@ const dateTimeToString = (datetime: Date): string => {
   return format(datetime, "yyyy-MM-dd'T'HH:mm");
 };
 
-interface CalendarModalProps {
-  save(newCalendarEvent: NewCalendarEvent): void;
-  calendarEvent?: CalendarEvent;
-  onDestroy?: () => void;
-}
-
 const newCalendarEventInitialState: NewCalendarEvent = {
   title: '',
   notes: '',
@@ -54,14 +50,13 @@ const newCalendarEventInitialState: NewCalendarEvent = {
   end: initialEndDate,
 };
 
-const CalendarModal: React.FC<CalendarModalProps> = ({
-  save,
-  calendarEvent,
-  onDestroy,
-}) => {
-  const { formValues, formErrors, isValid, setFormValue, handleInputChange } =
+const CalendarModal: React.FC = () => {
+  const { eventSelected, dispatch } = useCalendarEventState();
+  const isNewEvent = !eventSelected;
+
+  const { formValues, formErrors, isValid, setFormValues, handleInputChange } =
     useForm<NewCalendarEvent>(
-      calendarEvent ? calendarEvent : newCalendarEventInitialState
+      isNewEvent ? newCalendarEventInitialState : eventSelected
     );
 
   const { isOpen, closeModal } = useCalendarModalState();
@@ -71,7 +66,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({
   ) => {
     const { value, validity } = event.target;
     if (validity.valid) {
-      setFormValue({ start: dateTimeStringToDate(value) });
+      setFormValues({ start: dateTimeStringToDate(value) });
     }
   };
 
@@ -79,19 +74,33 @@ const CalendarModal: React.FC<CalendarModalProps> = ({
     const { value, validity } = event.target;
 
     if (validity.valid) {
-      setFormValue({ end: dateTimeStringToDate(value) });
+      setFormValues({ end: dateTimeStringToDate(value) });
     }
+  };
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+
+    if (isNewEvent) {
+      dispatch(calendarEventAction.addNewEvent(formValues));
+    } else {
+      dispatch(
+        calendarEventAction.updateEvent({ ...eventSelected, ...formValues })
+      );
+    }
+
+    closeModal();
   };
 
   useEffect(() => {
     if (formValues.end.getTime() < formValues.start.getTime()) {
-      setFormValue({ end: minEndDate(formValues.start) });
+      setFormValues({ end: minEndDate(formValues.start) });
     }
-  }, [formValues.start, formValues.end, setFormValue]);
+  }, [formValues.start, formValues.end, setFormValues]);
 
   useEffect(
-    () => () => onDestroy && calendarEvent && onDestroy(),
-    [onDestroy, calendarEvent]
+    () => () => dispatch(calendarEventAction.removeEventSelected()),
+    [dispatch]
   );
 
   return (
@@ -109,10 +118,7 @@ const CalendarModal: React.FC<CalendarModalProps> = ({
                 flexDirection="column"
                 gridRowGap={3}
                 marginBlock={3}
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  save(formValues);
-                }}
+                onSubmit={handleSubmit}
                 SubmitButton={
                   <Button
                     variant="outline"
@@ -182,7 +188,6 @@ const CalendarModal: React.FC<CalendarModalProps> = ({
                     name="notes"
                     value={formValues.notes}
                     onChange={handleInputChange}
-                    isRequired
                   />
                   <small id="emailHelp" className="form-text text-muted">
                     Información adicional

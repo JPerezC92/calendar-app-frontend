@@ -9,6 +9,12 @@ export const calendarEventReducer = (
   action: CalendarEventAction
 ): CalendarEventState => {
   switch (action.type) {
+    case CalendarEventActionEnum.SET_EVENTS:
+      return {
+        ...state,
+        events: action.payload,
+      };
+
     case CalendarEventActionEnum.SET_EVENT_SELECTED:
       return {
         ...state,
@@ -30,10 +36,12 @@ export const calendarEventReducer = (
         ],
       };
 
-    case CalendarEventActionEnum.SET_EVENTS:
+    case CalendarEventActionEnum.UPDATE_EVENT:
       return {
         ...state,
-        events: action.payload,
+        events: state.events.map((event) =>
+          event.id === action.payload.id ? action.payload : event
+        ),
       };
 
     default:
