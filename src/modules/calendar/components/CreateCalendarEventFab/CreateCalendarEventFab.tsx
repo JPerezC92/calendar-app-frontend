@@ -2,11 +2,11 @@ import { Button } from '@chakra-ui/button';
 import React from 'react';
 import { FaPlus } from 'react-icons/fa';
 
-interface CreateCalendarEventFABProps {
+interface CreateCalendarEventFabProps {
   onClick: () => void;
 }
 
-const CreateCalendarEventFAB: React.FC<CreateCalendarEventFABProps> = ({
+const CreateCalendarEventFab: React.FC<CreateCalendarEventFabProps> = ({
   onClick,
 }) => {
   return (
@@ -27,4 +27,4 @@ const CreateCalendarEventFAB: React.FC<CreateCalendarEventFABProps> = ({
   );
 };
 
-export default CreateCalendarEventFAB;
+export default CreateCalendarEventFab;

@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import addHours from 'date-fns/addHours';
 
-import { NotSelected } from 'src/modules/shared/types/NotSelected';
 import { calendarEventReducer } from '../reducers/calendarEvent';
 import { CalendarEvent } from '../types';
 
@@ -22,6 +21,7 @@ const initialCalendarEventState: CalendarEventState = {
     {
       id: 1,
       title: 'Cumpleaños',
+      notes: '',
       start: new Date(),
       end: addHours(new Date(), 5),
     },

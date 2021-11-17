@@ -108,7 +108,9 @@ const CalendarModal: React.FC = () => {
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Nuevo evento</ModalHeader>
+          <ModalHeader>
+            {isNewEvent ? 'Nuevo evento' : formValues.title}
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <>

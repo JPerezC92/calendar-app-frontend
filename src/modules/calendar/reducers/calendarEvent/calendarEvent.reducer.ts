@@ -8,6 +8,8 @@ export const calendarEventReducer = (
   state: CalendarEventState,
   action: CalendarEventAction
 ): CalendarEventState => {
+  const { eventSelected } = state;
+
   switch (action.type) {
     case CalendarEventActionEnum.SET_EVENTS:
       return {
@@ -42,6 +44,15 @@ export const calendarEventReducer = (
         events: state.events.map((event) =>
           event.id === action.payload.id ? action.payload : event
         ),
+      };
+
+    case CalendarEventActionEnum.DELETE_EVENT:
+      return {
+        ...state,
+        events: eventSelected
+          ? state.events.filter((event) => event.id !== eventSelected.id)
+          : [...state.events],
+        eventSelected: undefined,
       };
 
     default:

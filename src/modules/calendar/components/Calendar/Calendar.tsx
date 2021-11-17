@@ -13,7 +13,8 @@ import EventReminder from '../EventReminder';
 import CalendarModal from '../CalendarModal';
 import { useCalendarModalState } from '../../providers/ModalStateProvider';
 import { useCalendarEventState } from '../../providers';
-import CreateCalendarEventFAB from '../CreateCalendarEventFAB';
+import CreateCalendarEventFab from '../CreateCalendarEventFab';
+import DeleteCalendarEventFab from '../DeleteCalendarEventFab';
 import { calendarEventAction } from '../../reducers/calendarEvent';
 import { localizer } from './localizer';
 import type { CalendarEvent } from '../../types';
@@ -41,6 +42,11 @@ const Calendar: React.FC = () => {
         ...event,
       })
     );
+  };
+
+  const onSelectSlot: ReactBigCalendarProps['onSelectSlot'] = (slotInfo) => {
+    console.log(slotInfo);
+    calendarEventState.dispatch(calendarEventAction.removeEventSelected());
   };
 
   const onViewChange: ReactBigCalendarProps['onView'] = (event) => {
@@ -81,12 +87,23 @@ const Calendar: React.FC = () => {
           onDoubleClickEvent={onDoubleClickEvent}
           onView={onViewChange}
           onSelectEvent={onSelectEvent}
+          selectable
+          onSelectSlot={onSelectSlot}
           view={lastView}
           components={{
             event: EventReminder,
           }}
         />
-        <CreateCalendarEventFAB onClick={calendarModalState.openModal} />
+
+        {calendarEventState.eventSelected && (
+          <DeleteCalendarEventFab
+            onClick={() =>
+              calendarEventState.dispatch(calendarEventAction.deleteEvent())
+            }
+          />
+        )}
+
+        <CreateCalendarEventFab onClick={calendarModalState.openModal} />
 
         {calendarModalState.isOpen && <CalendarModal />}
       </Box>

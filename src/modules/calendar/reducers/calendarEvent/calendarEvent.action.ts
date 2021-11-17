@@ -1,4 +1,4 @@
-import { RemoveEventSelected, UpdateEvent } from '.';
+import { DeleteEvent, RemoveEventSelected, UpdateEvent } from '.';
 import {
   CalendarEventActionEnum,
   SetEvents,
@@ -24,6 +24,10 @@ export const calendarEventAction = {
   updateEvent: (event: UpdateEvent['payload']): UpdateEvent => ({
     type: CalendarEventActionEnum.UPDATE_EVENT,
     payload: event,
+  }),
+
+  deleteEvent: (): DeleteEvent => ({
+    type: CalendarEventActionEnum.DELETE_EVENT,
   }),
 
   setEvents: (events: SetEvents['payload']): SetEvents => ({
