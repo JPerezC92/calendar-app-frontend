@@ -16,7 +16,7 @@ export type AuthenticationState = {
 
 export const initialAuthenticationState: AuthenticationState = {
   isAuthenticated: false,
-  user: { name: '', uid: '', token: '' },
+  user: { name: '', uid: '' },
   dispatch: (state) => state,
 };
 

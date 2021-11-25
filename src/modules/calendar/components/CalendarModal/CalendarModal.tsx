@@ -16,11 +16,11 @@ import {
   ModalOverlay,
 } from '@chakra-ui/modal';
 import { Textarea } from '@chakra-ui/textarea';
-import { addHours, addMinutes, format, parse } from 'date-fns';
+import { addHours, addMinutes, format, getTime, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
 
 import Form from 'src/modules/shared/components/Form';
-import { useForm } from 'src/modules/shared/hooks';
+import { ToFormValues, useForm } from 'src/modules/shared/hooks';
 import { useCalendarEventState, useCalendarModalState } from '../../providers';
 import { NewCalendarEvent } from '../../types';
 import { calendarEventAction } from '../../reducers/calendarEvent';
@@ -31,19 +31,29 @@ const baseDate = parse(
   new Date()
 );
 
-const initialStartDate = addHours(baseDate, 1);
-const initialEndDate = addHours(baseDate, 2);
-const minEndDate = (startDate: Date) => addMinutes(startDate, 5);
+// Date string in milliseconds
+const initialStartDate = getTime(addHours(baseDate, 1)).toString();
+const initialEndDate = getTime(addHours(baseDate, 2)).toString();
 
 const dateTimeStringToDate = (datetimeString: string): Date => {
   return parse(datetimeString, "yyyy-MM-dd'T'HH:mm", new Date());
 };
 
-const dateTimeToString = (datetime: Date): string => {
-  return format(datetime, "yyyy-MM-dd'T'HH:mm");
+const dateToDateTimeString = (date: Date): string => {
+  return format(date, "yyyy-MM-dd'T'HH:mm");
 };
 
-const newCalendarEventInitialState: NewCalendarEvent = {
+const toCalendarEvent = (
+  calendarEventFormValues: ToFormValues<NewCalendarEvent>
+): NewCalendarEvent => {
+  return {
+    ...calendarEventFormValues,
+    end: new Date(parseInt(calendarEventFormValues.end, 10)),
+    start: new Date(parseInt(calendarEventFormValues.start, 10)),
+  };
+};
+
+const newCalendarEventInitialState: ToFormValues<NewCalendarEvent> = {
   title: '',
   notes: '',
   start: initialStartDate,
@@ -56,7 +66,13 @@ const CalendarModal: React.FC = () => {
 
   const { formValues, formErrors, isValid, setFormValues, handleInputChange } =
     useForm<NewCalendarEvent>(
-      isNewEvent ? newCalendarEventInitialState : eventSelected
+      isNewEvent
+        ? newCalendarEventInitialState
+        : {
+            ...eventSelected,
+            start: eventSelected.start.getTime().toString(),
+            end: eventSelected.end.getTime().toString(),
+          }
     );
 
   const { isOpen, closeModal } = useCalendarModalState();
@@ -65,8 +81,11 @@ const CalendarModal: React.FC = () => {
     event
   ) => {
     const { value, validity } = event.target;
+
     if (validity.valid) {
-      setFormValues({ start: dateTimeStringToDate(value) });
+      setFormValues({
+        start: dateTimeStringToDate(value).getTime().toString(),
+      });
     }
   };
 
@@ -74,7 +93,7 @@ const CalendarModal: React.FC = () => {
     const { value, validity } = event.target;
 
     if (validity.valid) {
-      setFormValues({ end: dateTimeStringToDate(value) });
+      setFormValues({ end: dateTimeStringToDate(value).getTime().toString() });
     }
   };
 
@@ -82,10 +101,17 @@ const CalendarModal: React.FC = () => {
     event.preventDefault();
 
     if (isNewEvent) {
-      dispatch(calendarEventAction.addNewEvent(formValues));
+      dispatch(
+        calendarEventAction.addNewEvent({
+          ...toCalendarEvent(formValues),
+        })
+      );
     } else {
       dispatch(
-        calendarEventAction.updateEvent({ ...eventSelected, ...formValues })
+        calendarEventAction.updateEvent({
+          ...eventSelected,
+          ...toCalendarEvent(formValues),
+        })
       );
     }
 
@@ -93,8 +119,10 @@ const CalendarModal: React.FC = () => {
   };
 
   useEffect(() => {
-    if (formValues.end.getTime() < formValues.start.getTime()) {
-      setFormValues({ end: minEndDate(formValues.start) });
+    if (parseInt(formValues.end, 10) < parseInt(formValues.start, 10)) {
+      setFormValues({
+        end: addMinutes(parseInt(formValues.start, 10), 5).getTime().toString(),
+      });
     }
   }, [formValues.start, formValues.end, setFormValues]);
 
@@ -108,9 +136,6 @@ const CalendarModal: React.FC = () => {
       <Modal isOpen={isOpen} onClose={closeModal}>
         <ModalOverlay />
         <ModalContent>
-          <div>{JSON.stringify(formValues.start)}</div>
-          <div>{JSON.stringify(formValues.end)}</div>
-
           <ModalHeader>
             {isNewEvent ? 'Nuevo evento' : formValues.title}
           </ModalHeader>
@@ -140,7 +165,9 @@ const CalendarModal: React.FC = () => {
                   <FormLabel>Fecha y hora inicio</FormLabel>
                   <Input
                     name="start"
-                    value={dateTimeToString(formValues.start)}
+                    value={dateToDateTimeString(
+                      new Date(parseInt(formValues.start, 10))
+                    )}
                     isRequired
                     onChange={handleStartDateChange}
                     placeholder="Fecha inicio"
@@ -154,9 +181,13 @@ const CalendarModal: React.FC = () => {
                   <FormLabel>Fecha y hora fin</FormLabel>
                   <Input
                     name="end"
-                    value={dateTimeToString(formValues.end)}
+                    value={dateToDateTimeString(
+                      new Date(parseInt(formValues.end, 10))
+                    )}
                     isRequired
-                    min={dateTimeToString(minEndDate(formValues.start))}
+                    min={dateToDateTimeString(
+                      addMinutes(parseInt(formValues.start, 10), 5)
+                    )}
                     onChange={handleEndDateChange}
                     placeholder="Fecha fin"
                     required
@@ -180,9 +211,7 @@ const CalendarModal: React.FC = () => {
                     isRequired
                   />
                   <FormErrorMessage>{formErrors.title}</FormErrorMessage>
-                  <small id="emailHelp" className="form-text text-muted">
-                    Una descripción corta
-                  </small>
+                  <small>Una descripción corta</small>
                 </FormControl>
 
                 <FormControl>
@@ -194,9 +223,7 @@ const CalendarModal: React.FC = () => {
                     value={formValues.notes}
                     onChange={handleInputChange}
                   />
-                  <small id="emailHelp" className="form-text text-muted">
-                    Información adicional
-                  </small>
+                  <small>Información adicional</small>
                 </FormControl>
               </Form>
             </>

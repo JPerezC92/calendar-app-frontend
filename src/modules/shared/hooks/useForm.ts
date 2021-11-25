@@ -1,23 +1,21 @@
 import { useState } from 'react';
 
+export type ToFormValues<Type> = { [key in keyof Type]: string };
 interface FormError<FormValues> {
   errorField: keyof FormValues;
   errorMessage: string;
 }
 
 interface UseForm {
-  <FormValues = Record<string, unknown>>(values: FormValues): {
-    formValues: FormValues;
-    formErrors: Record<keyof FormValues, string>;
+  <FormValues = Record<string, string>>(values: ToFormValues<FormValues>): {
+    formValues: typeof values;
+    formErrors: Record<keyof typeof values, string>;
     isValid: boolean;
     handleInputChange(
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ): void;
-    setFormValues<Key extends keyof FormValues>(
-      newFormValues: Record<Key, FormValues[Key]>
-    ): void;
-    setFormError(formError: FormError<FormValues>): void;
-    setNewformValues(newFormState: FormValues): void;
+    setFormValues(newFormValues: Partial<typeof values>): void;
+    setFormError(formError: FormError<typeof values>): void;
     reset(): void;
   };
 }
@@ -47,10 +45,6 @@ export const useForm: UseForm = (initialStateValues) => {
   };
 
   const isValid = Object.values(formErrors).every((value) => value === '');
-
-  const setNewformValues = (newFormValues = initialStateValues) => {
-    setValues(() => newFormValues);
-  };
 
   const handleInputChange: UseFormResult['handleInputChange'] = (event) => {
     const { name, value, validity, validationMessage } = event.target;
@@ -87,6 +81,5 @@ export const useForm: UseForm = (initialStateValues) => {
     setFormValues,
     setFormError,
     reset,
-    setNewformValues,
   };
 };
