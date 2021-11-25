@@ -1,9 +1,11 @@
-import { NextPage } from "next";
-import { Button } from "@chakra-ui/button";
-import { Divider } from "@chakra-ui/layout";
-import AuthFormContainer from "src/modules/auth/components/AuthFormContainer";
-import AuthLayout from "src/modules/auth/components/AuthLayout";
-import RegisterForm from "src/modules/auth/components/RegisterForm";
+import { NextPage } from 'next';
+import { Button } from '@chakra-ui/button';
+import { Divider } from '@chakra-ui/layout';
+
+import AuthFormContainer from 'src/modules/auth/components/AuthFormContainer';
+import AuthLayout from 'src/modules/auth/components/AuthLayout';
+import RegisterForm from 'src/modules/auth/components/RegisterForm';
+import { withoutAuthentication } from 'src/modules/auth/HOCS';
 
 const RegisterPage: NextPage = () => {
   return (
@@ -21,4 +23,4 @@ const RegisterPage: NextPage = () => {
   );
 };
 
-export default RegisterPage;
+export default withoutAuthentication({ WrappedComponent: RegisterPage });

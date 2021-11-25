@@ -1,0 +1,3 @@
+{
+  "exportall.config.relExclusion": ["/src/modules/auth/types/repositories"]
+}

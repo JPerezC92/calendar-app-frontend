@@ -1,10 +1,11 @@
+import { NextPage } from 'next';
 import { Button } from '@chakra-ui/button';
 import { Divider } from '@chakra-ui/layout';
-import { NextPage } from 'next';
-import React from 'react';
+
 import AuthFormContainer from 'src/modules/auth/components/AuthFormContainer';
 import AuthLayout from 'src/modules/auth/components/AuthLayout';
 import LoginForm from 'src/modules/auth/components/LoginForm';
+import { withoutAuthentication } from 'src/modules/auth/HOCS';
 
 const LoginPage: NextPage = () => {
   return (
@@ -20,4 +21,4 @@ const LoginPage: NextPage = () => {
   );
 };
 
-export default LoginPage;
+export default withoutAuthentication({ WrappedComponent: LoginPage });

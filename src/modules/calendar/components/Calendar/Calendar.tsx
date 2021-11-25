@@ -18,14 +18,15 @@ import DeleteCalendarEventFab from '../DeleteCalendarEventFab';
 import { calendarEventAction } from '../../reducers/calendarEvent';
 import { localizer } from './localizer';
 import type { CalendarEvent } from '../../types';
+import LocalStorageService from 'src/modules/shared/services/LocalStorageService';
 
 type ReactBigCalendarProps = RBCalendarProps<CalendarEvent>;
 
 const Calendar: React.FC = () => {
+  const view = LocalStorageService.get('lastView');
+
   const [lastView, setLastView] = useState<View>(
-    ApplicationSide.isBrowser
-      ? (localStorage.getItem('lastView') as View) || 'month'
-      : 'month'
+    ApplicationSide.isBrowser && view ? view : 'month'
   );
 
   const calendarModalState = useCalendarModalState();
@@ -51,7 +52,7 @@ const Calendar: React.FC = () => {
 
   const onViewChange: ReactBigCalendarProps['onView'] = (event) => {
     setLastView(() => event);
-    window.localStorage.setItem('lastView', event);
+    LocalStorageService.save('lastView', event);
   };
 
   const eventStyleGetter: ReactBigCalendarProps['eventPropGetter'] = (

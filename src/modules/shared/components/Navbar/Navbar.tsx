@@ -1,11 +1,13 @@
-import React from 'react';
 import { chakra } from '@chakra-ui/system';
 import { Flex } from '@chakra-ui/layout';
 import LogoutButton from 'src/modules/auth/components/LogoutButton';
+import { User } from 'src/modules/auth/types';
 
-interface NavbarProps {}
+interface NavbarProps {
+  user: User;
+}
 
-const Navbar: React.FC<NavbarProps> = () => {
+const Navbar: React.FC<NavbarProps> = ({ user }) => {
   return (
     <>
       <Flex
@@ -14,7 +16,7 @@ const Navbar: React.FC<NavbarProps> = () => {
         backgroundColor="gray.800"
         alignItems="center"
       >
-        <chakra.span color="white">Pedro</chakra.span>
+        <chakra.span color="white">{user.name}</chakra.span>
 
         <LogoutButton />
       </Flex>
