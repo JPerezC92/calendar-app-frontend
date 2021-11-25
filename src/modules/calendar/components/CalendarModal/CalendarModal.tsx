@@ -149,17 +149,6 @@ const CalendarModal: React.FC = () => {
                 gridRowGap={3}
                 marginBlock={3}
                 onSubmit={handleSubmit}
-                SubmitButton={
-                  <Button
-                    variant="outline"
-                    colorScheme="blue"
-                    type="submit"
-                    isDisabled={!isValid}
-                    leftIcon={<FaSave fontSize={20} />}
-                  >
-                    Guardar
-                  </Button>
-                }
               >
                 <FormControl isInvalid={Boolean(formErrors.start)} isRequired>
                   <FormLabel>Fecha y hora inicio</FormLabel>
@@ -225,6 +214,16 @@ const CalendarModal: React.FC = () => {
                   />
                   <small>Información adicional</small>
                 </FormControl>
+
+                <Button
+                  variant="outline"
+                  colorScheme="blue"
+                  type="submit"
+                  isDisabled={!isValid}
+                  leftIcon={<FaSave fontSize={20} />}
+                >
+                  Guardar
+                </Button>
               </Form>
             </>
           </ModalBody>

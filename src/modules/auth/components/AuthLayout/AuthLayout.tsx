@@ -1,9 +1,7 @@
 import React from 'react';
 import { chakra } from '@chakra-ui/system';
 
-interface AuthLayoutProps {}
-
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
+const AuthLayout: React.FC = ({ children }) => {
   return (
     <chakra.main
       width="100vw"

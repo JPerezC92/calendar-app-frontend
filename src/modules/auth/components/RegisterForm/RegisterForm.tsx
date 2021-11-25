@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from '@chakra-ui/button';
 import { FormControl, FormLabel } from '@chakra-ui/form-control';
 import { Input } from '@chakra-ui/input';
@@ -7,26 +6,16 @@ import { ChakraProps } from '@chakra-ui/system';
 import Form from 'src/modules/shared/components/Form';
 import { FormTitle } from 'src/modules/shared/components/Form/FormTitle';
 
-interface RegisterFormProps {}
-
 const registerFormStyles: ChakraProps = {
   display: 'flex',
   flexDirection: 'column',
   gridRowGap: 5,
 };
 
-const RegisterForm: React.FC<RegisterFormProps> = () => {
+const RegisterForm: React.FC = () => {
   return (
     <>
-      <Form
-        onSubmit={(e) => e.preventDefault()}
-        SubmitButton={
-          <Button type="submit" colorScheme="blue">
-            Enviar
-          </Button>
-        }
-        {...registerFormStyles}
-      >
+      <Form onSubmit={(e) => e.preventDefault()} {...registerFormStyles}>
         <FormTitle>Registrarse</FormTitle>
 
         <FormControl id="firstname" isRequired>
@@ -53,6 +42,10 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
           <FormLabel>Confirmar contraseña</FormLabel>
           <Input placeholder="************" type="text" />
         </FormControl>
+
+        <Button type="submit" colorScheme="blue">
+          Enviar
+        </Button>
       </Form>
     </>
   );

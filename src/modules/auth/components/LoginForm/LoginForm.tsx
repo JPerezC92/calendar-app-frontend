@@ -52,15 +52,7 @@ const LoginForm: React.FC = () => {
 
   return (
     <>
-      <Form
-        onSubmit={handleSubmit}
-        SubmitButton={
-          <Button type="submit" colorScheme="blue">
-            Ingresar
-          </Button>
-        }
-        {...loginFormStyles}
-      >
+      <Form onSubmit={handleSubmit} {...loginFormStyles}>
         <FormTitle>Iniciar Sesion</FormTitle>
 
         <FormControl id="email" isRequired>
@@ -84,6 +76,10 @@ const LoginForm: React.FC = () => {
             value={credentials.password}
           />
         </FormControl>
+
+        <Button type="submit" colorScheme="blue">
+          Ingresar
+        </Button>
       </Form>
     </>
   );
