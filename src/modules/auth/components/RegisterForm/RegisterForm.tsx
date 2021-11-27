@@ -12,14 +12,13 @@ import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import Form from 'src/modules/shared/components/Form';
 import { FormTitle } from 'src/modules/shared/components/Form/FormTitle';
-import { useForm } from 'src/modules/shared/hooks';
+import { useForm, useSubmit } from 'src/modules/shared/hooks';
 import { RegisterUserValues } from '../../types';
 import { RegisterExpressRepository } from '../../repositories/RegisterExpressRepository';
 import { useAuthenticationState } from '../../providers';
 import { authenticationAction } from '../../reducers/authentication';
 import LocalStorageService from 'src/modules/shared/services/LocalStorageService';
 import { useToast } from '@chakra-ui/toast';
-import { useSubmit } from 'src/modules/shared/hooks/useSubmit';
 
 const registerFormStyles: ChakraProps = {
   display: 'flex',

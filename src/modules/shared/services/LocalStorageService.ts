@@ -3,7 +3,7 @@ interface LocalStorageItems {
   lastView: 'month' | 'week' | 'work_week' | 'day' | 'agenda';
 }
 
-class LocalStorageService {
+export class LocalStorageService {
   static get<Key extends keyof LocalStorageItems>(
     key: Key
   ): LocalStorageItems[Key] | void {
@@ -19,5 +19,3 @@ class LocalStorageService {
     window.localStorage.setItem(key, JSON.stringify(value));
   }
 }
-
-export default LocalStorageService;

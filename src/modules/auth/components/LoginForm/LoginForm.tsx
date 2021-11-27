@@ -6,14 +6,13 @@ import { Button } from '@chakra-ui/button';
 
 import Form from 'src/modules/shared/components/Form';
 import { FormTitle } from 'src/modules/shared/components/Form/FormTitle';
-import { useForm } from 'src/modules/shared/hooks';
+import { useForm, useSubmit } from 'src/modules/shared/hooks';
 import { LoginExpressRepository } from '../../repositories/LoginExpressRepository';
 import { Credentials } from '../../types';
 import { useAuthenticationState } from '../../providers';
 import { authenticationAction } from '../../reducers/authentication';
-import LocalStorageService from 'src/modules/shared/services/LocalStorageService';
+import { LocalStorageService } from 'src/modules/shared/services';
 import { useToast } from '@chakra-ui/toast';
-import { useSubmit } from 'src/modules/shared/hooks/useSubmit';
 
 const loginFormStyles: ChakraProps = {
   display: 'flex',

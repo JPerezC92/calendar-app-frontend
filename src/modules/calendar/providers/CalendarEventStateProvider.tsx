@@ -3,12 +3,19 @@ import React, {
   Dispatch,
   ReducerAction,
   useContext,
+  useEffect,
   useReducer,
 } from 'react';
 import addHours from 'date-fns/addHours';
 
-import { calendarEventReducer } from '../reducers/calendarEvent';
+import {
+  calendarEventAction,
+  calendarEventReducer,
+} from '../reducers/calendarEvent';
 import { CalendarEvent } from '../types';
+import { GetEventsExpressRepository } from '../repositories/GetEventsExpressRepository';
+import { useQueryRequest } from 'src/modules/shared/hooks';
+import LoadingSpinner from 'src/modules/shared/components/LoadingSpinner';
 
 export interface CalendarEventState {
   events: CalendarEvent[];
@@ -17,15 +24,7 @@ export interface CalendarEventState {
 }
 
 const initialCalendarEventState: CalendarEventState = {
-  events: [
-    {
-      id: 1,
-      title: 'Cumpleaños',
-      notes: '',
-      start: new Date(),
-      end: addHours(new Date(), 5),
-    },
-  ],
+  events: [],
   eventSelected: undefined,
   dispatch: (state) => state,
 };
@@ -43,14 +42,23 @@ export const useCalendarEventState = () => {
 };
 
 export const CalendarEventStateProvider: React.FC = ({ children }) => {
+  const [result, isLoading] = useQueryRequest(() =>
+    GetEventsExpressRepository()
+  );
   const [state, dispatch] = useReducer(
     calendarEventReducer,
     initialCalendarEventState
   );
 
+  useEffect(() => {
+    if (result?.success) {
+      dispatch(calendarEventAction.setEvents(result.payload));
+    }
+  }, [result]);
+
   return (
     <CalendarEventStateContext.Provider value={{ ...state, dispatch }}>
-      {children}
+      {isLoading ? <LoadingSpinner /> : children}
     </CalendarEventStateContext.Provider>
   );
 };

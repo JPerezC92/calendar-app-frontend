@@ -1,3 +1,6 @@
 {
-  "exportall.config.relExclusion": ["/src/modules/auth/types/repositories"]
+  "exportall.config.relExclusion": [
+    "/src/modules/auth/types/repositories",
+    "/src/modules/calendar/types/repositories"
+  ]
 }

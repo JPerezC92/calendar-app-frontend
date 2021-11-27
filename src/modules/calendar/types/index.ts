@@ -1,2 +1,2 @@
-export * from './NewCalendarEvent';
 export * from './CalendarEvent';
+export * from './NewCalendarEvent';

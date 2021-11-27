@@ -1,3 +1,3 @@
 import { CalendarEvent } from '.';
 
-export type NewCalendarEvent = Omit<CalendarEvent, 'id'>;
+export type NewCalendarEvent = Omit<CalendarEvent, 'id' | 'user'>;

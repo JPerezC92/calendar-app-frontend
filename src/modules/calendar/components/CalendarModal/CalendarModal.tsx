@@ -64,14 +64,14 @@ const CalendarModal: React.FC = () => {
   const { eventSelected, dispatch } = useCalendarEventState();
   const isNewEvent = !eventSelected;
 
-  const { formValues, formErrors, isValid, setFormValues, handleInputChange } =
+  const { formValues, formErrors, setFormValues, handleInputChange } =
     useForm<NewCalendarEvent>(
       isNewEvent
         ? newCalendarEventInitialState
         : {
             ...eventSelected,
-            start: eventSelected.start.getTime().toString(),
-            end: eventSelected.end.getTime().toString(),
+            start: new Date(eventSelected.start).getTime().toString(),
+            end: new Date(eventSelected.end).getTime().toString(),
           }
     );
 
@@ -219,7 +219,6 @@ const CalendarModal: React.FC = () => {
                   variant="outline"
                   colorScheme="blue"
                   type="submit"
-                  isDisabled={!isValid}
                   leftIcon={<FaSave fontSize={20} />}
                 >
                   Guardar

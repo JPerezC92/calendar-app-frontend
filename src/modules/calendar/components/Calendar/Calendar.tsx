@@ -18,7 +18,7 @@ import DeleteCalendarEventFab from '../DeleteCalendarEventFab';
 import { calendarEventAction } from '../../reducers/calendarEvent';
 import { localizer } from './localizer';
 import type { CalendarEvent } from '../../types';
-import LocalStorageService from 'src/modules/shared/services/LocalStorageService';
+import { LocalStorageService } from 'src/modules/shared/services';
 
 type ReactBigCalendarProps = RBCalendarProps<CalendarEvent>;
 
