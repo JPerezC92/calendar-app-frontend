@@ -16,7 +16,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
         backgroundColor="gray.800"
         alignItems="center"
       >
-        <chakra.span color="white">{user.name}</chakra.span>
+        <chakra.span color="white">{user.firstname}</chakra.span>
 
         <LogoutButton />
       </Flex>

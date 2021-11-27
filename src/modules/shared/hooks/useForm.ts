@@ -7,7 +7,9 @@ interface FormError<FormValues> {
 }
 
 interface UseForm {
-  <FormValues = Record<string, string>>(values: ToFormValues<FormValues>): {
+  <FormValues = Record<string, string>>(values: {
+    [key in keyof FormValues]: string;
+  }): {
     formValues: typeof values;
     formErrors: Record<keyof typeof values, string>;
     isValid: boolean;

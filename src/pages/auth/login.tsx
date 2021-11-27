@@ -14,7 +14,9 @@ const LoginPage: NextPage = () => {
     <AuthLayout>
       <AuthFormContainer>
         <LoginForm />
+
         <Divider />
+
         <Link href={AuthWebRoute.REGISTER} passHref>
           <Button as="a" variant="outline" colorScheme="cyan">
             Registrarse

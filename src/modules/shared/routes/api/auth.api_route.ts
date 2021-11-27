@@ -5,7 +5,7 @@ const root = `${BASE_API_URL}`;
 const AUTH_ROOT = `${root}auth/`;
 
 export const AuthApiRoute = {
-  LOGIN: `${AUTH_ROOT}`,
+  LOGIN: `${AUTH_ROOT}login`,
   REGISTER: `${AUTH_ROOT}register`,
   RENEW_TOKEN: `${AUTH_ROOT}renew-token`,
 };

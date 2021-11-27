@@ -5,7 +5,7 @@ const AuthLayout: React.FC = ({ children }) => {
   return (
     <chakra.main
       width="100vw"
-      height="100vh"
+      minHeight="100vh"
       display="flex"
       flexDirection="column"
       padding={10}

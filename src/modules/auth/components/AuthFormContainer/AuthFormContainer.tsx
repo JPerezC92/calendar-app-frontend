@@ -1,9 +1,6 @@
-import React from 'react';
 import { Flex } from '@chakra-ui/layout';
 
-interface AuthFormContainerProps {}
-
-const AuthFormContainer: React.FC<AuthFormContainerProps> = ({ children }) => {
+const AuthFormContainer: React.FC = ({ children }) => {
   return (
     <Flex
       margin="auto"
