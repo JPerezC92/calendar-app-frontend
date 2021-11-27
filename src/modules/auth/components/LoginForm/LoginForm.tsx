@@ -1,4 +1,4 @@
-import React, { FormEventHandler } from 'react';
+import React, { useEffect } from 'react';
 import { ChakraProps } from '@chakra-ui/system';
 import { FormControl, FormLabel } from '@chakra-ui/form-control';
 import { Input } from '@chakra-ui/input';
@@ -13,6 +13,7 @@ import { useAuthenticationState } from '../../providers';
 import { authenticationAction } from '../../reducers/authentication';
 import LocalStorageService from 'src/modules/shared/services/LocalStorageService';
 import { useToast } from '@chakra-ui/toast';
+import { useSubmit } from 'src/modules/shared/hooks/useSubmit';
 
 const loginFormStyles: ChakraProps = {
   display: 'flex',
@@ -25,15 +26,16 @@ const LoginForm: React.FC = () => {
   const authenticationState = useAuthenticationState();
 
   const { formValues: credentials, handleInputChange } = useForm<Credentials>({
-    email: 'jperez.c921@gmail.com',
-    password: '12345678aA-',
+    email: 'jperez.c92@gmail.com',
+    password: '123456aA',
   });
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
-    const result = await LoginExpressRepository(credentials);
+  const [handleSubmit, result, isSubmitting] = useSubmit(() =>
+    LoginExpressRepository(credentials)
+  );
 
-    if (result.success) {
+  useEffect(() => {
+    if (result?.success) {
       LocalStorageService.save('auth', {
         token: result.payload.token,
         tokenInitDate: new Date().toISOString(),
@@ -43,12 +45,13 @@ const LoginForm: React.FC = () => {
         authenticationAction.login(result.payload.user)
       );
     }
-
-    toast({
-      title: result.message,
-      status: 'error',
-    });
-  };
+    if (result && !result.success) {
+      toast({
+        title: result.message,
+        status: 'error',
+      });
+    }
+  }, [authenticationState, result, toast]);
 
   return (
     <>
@@ -77,7 +80,7 @@ const LoginForm: React.FC = () => {
           />
         </FormControl>
 
-        <Button type="submit" colorScheme="blue">
+        <Button isLoading={isSubmitting} type="submit" colorScheme="blue">
           Ingresar
         </Button>
       </Form>

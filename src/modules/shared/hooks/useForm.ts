@@ -12,7 +12,6 @@ interface UseForm {
   }): {
     formValues: typeof values;
     formErrors: Record<keyof typeof values, string>;
-    isValid: boolean;
     handleInputChange(
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ): void;
@@ -46,8 +45,6 @@ export const useForm: UseForm = (initialStateValues) => {
     }));
   };
 
-  const isValid = Object.values(formErrors).every((value) => value === '');
-
   const handleInputChange: UseFormResult['handleInputChange'] = (event) => {
     const { name, value, validity, validationMessage } = event.target;
     const errorField = name as keyof typeof formErrors;
@@ -78,7 +75,6 @@ export const useForm: UseForm = (initialStateValues) => {
   return {
     formValues: values,
     formErrors,
-    isValid,
     handleInputChange,
     setFormValues,
     setFormError,

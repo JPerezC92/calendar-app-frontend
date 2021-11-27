@@ -1,4 +1,4 @@
-import React, { FormEventHandler } from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@chakra-ui/button';
 import {
   FormControl,
@@ -19,6 +19,7 @@ import { useAuthenticationState } from '../../providers';
 import { authenticationAction } from '../../reducers/authentication';
 import LocalStorageService from 'src/modules/shared/services/LocalStorageService';
 import { useToast } from '@chakra-ui/toast';
+import { useSubmit } from 'src/modules/shared/hooks/useSubmit';
 
 const registerFormStyles: ChakraProps = {
   display: 'flex',
@@ -37,15 +38,16 @@ const registerFormInitialState: RegisterUserValues = {
 const RegisterForm: React.FC = () => {
   const authenticationState = useAuthenticationState();
   const toast = useToast();
-  const { formValues, formErrors, isValid, handleInputChange } = useForm(
+  const { formValues, formErrors, handleInputChange } = useForm(
     registerFormInitialState
   );
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
-    const result = await RegisterExpressRepository(formValues);
+  const [handleSubmit, result, isLoading] = useSubmit(() =>
+    RegisterExpressRepository(formValues)
+  );
 
-    if (result.success) {
+  useEffect(() => {
+    if (result?.success) {
       const { payload } = result;
 
       LocalStorageService.save('auth', {
@@ -58,11 +60,13 @@ const RegisterForm: React.FC = () => {
       );
     }
 
-    toast({
-      title: result.message,
-      status: 'error',
-    });
-  };
+    if (result && !result.success) {
+      toast({
+        title: result.message,
+        status: 'error',
+      });
+    }
+  }, [authenticationState, result, toast]);
 
   return (
     <>
@@ -183,7 +187,7 @@ const RegisterForm: React.FC = () => {
           </FormErrorMessage>
         </FormControl>
 
-        <Button isDisabled={!isValid} type="submit" colorScheme="blue">
+        <Button isLoading={isLoading} type="submit" colorScheme="blue">
           Enviar
         </Button>
       </Form>
