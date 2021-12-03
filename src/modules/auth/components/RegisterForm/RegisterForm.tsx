@@ -17,7 +17,7 @@ import { RegisterUserValues } from '../../types';
 import { RegisterExpressRepository } from '../../repositories/RegisterExpressRepository';
 import { useAuthenticationState } from '../../providers';
 import { authenticationAction } from '../../reducers/authentication';
-import LocalStorageService from 'src/modules/shared/services/LocalStorageService';
+import { LocalStorageService } from 'src/modules/shared/services';
 import { useToast } from '@chakra-ui/toast';
 
 const registerFormStyles: ChakraProps = {

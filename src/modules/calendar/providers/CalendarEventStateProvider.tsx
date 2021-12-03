@@ -1,12 +1,12 @@
-import React, {
+import {
   createContext,
   Dispatch,
   ReducerAction,
   useContext,
   useEffect,
   useReducer,
+  useRef,
 } from 'react';
-import addHours from 'date-fns/addHours';
 
 import {
   calendarEventAction,
@@ -42,13 +42,12 @@ export const useCalendarEventState = () => {
 };
 
 export const CalendarEventStateProvider: React.FC = ({ children }) => {
-  const [result, isLoading] = useQueryRequest(() =>
-    GetEventsExpressRepository()
-  );
   const [state, dispatch] = useReducer(
     calendarEventReducer,
     initialCalendarEventState
   );
+
+  const [result, isLoading] = useQueryRequest(GetEventsExpressRepository);
 
   useEffect(() => {
     if (result?.success) {
@@ -57,8 +56,10 @@ export const CalendarEventStateProvider: React.FC = ({ children }) => {
   }, [result]);
 
   return (
-    <CalendarEventStateContext.Provider value={{ ...state, dispatch }}>
-      {isLoading ? <LoadingSpinner /> : children}
-    </CalendarEventStateContext.Provider>
+    <>
+      <CalendarEventStateContext.Provider value={{ ...state, dispatch }}>
+        {isLoading ? <LoadingSpinner /> : children}
+      </CalendarEventStateContext.Provider>
+    </>
   );
 };

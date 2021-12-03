@@ -1,4 +1,5 @@
-import { FormEventHandler, useEffect, useState } from 'react';
+import { FormEventHandler, useCallback, useState } from 'react';
+import { useIsMounted } from './useIsMounted';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
@@ -10,31 +11,34 @@ interface UseSubmit {
   ];
 }
 
-let __isMounted = true;
-
 export const useSubmit: UseSubmit = (request) => {
+  const isMounted = useIsMounted();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentRequest] = useState(() => request);
   const [result, setResult] = useState<Awaited<
     ReturnType<typeof request>
   > | null>(null);
 
-  const handleOnSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
-    event.preventDefault();
-    setIsSubmitting(true);
+  const handleOnSubmit: FormEventHandler<HTMLFormElement> = useCallback(
+    async (event) => {
+      event.preventDefault();
 
-    if (__isMounted) {
-      const result = await request();
-      setResult(() => result);
-
-      setIsSubmitting(false);
-    }
-  };
-
-  useEffect(
-    () => () => {
-      __isMounted = false;
+      try {
+        if (isMounted()) {
+          setIsSubmitting(true);
+          const result = await currentRequest();
+          setResult(() => result);
+          setIsSubmitting(false);
+        }
+      } catch (error) {
+        console.log(error);
+        if (isMounted()) setResult(() => null);
+      } finally {
+        if (isMounted()) setIsSubmitting(false);
+      }
     },
-    []
+    [currentRequest, isMounted]
   );
 
   return [handleOnSubmit, result, isSubmitting] as const;

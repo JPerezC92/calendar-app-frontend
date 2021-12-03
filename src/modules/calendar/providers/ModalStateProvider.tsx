@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 
 export interface CalendarModalStateContext {
   isOpen: boolean;
@@ -25,8 +25,8 @@ export const useCalendarModalState = () => {
 export const CalendarModalStateProvider: React.FC = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const openModal = useCallback(() => setIsOpen(true), []);
+  const closeModal = useCallback(() => setIsOpen(false), []);
 
   return (
     <CalendarModalStateContext.Provider

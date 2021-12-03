@@ -13,7 +13,6 @@ export const GetEventsExpressRepository: GetEventsRepository = async () => {
     return response.json() as ReturnType<GetEventsRepository>;
   } catch (error) {
     console.log('GetEventsExpressRepository', error);
-
     return unexpectedError;
   }
 };
