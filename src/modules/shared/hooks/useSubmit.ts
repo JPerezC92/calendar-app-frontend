@@ -15,7 +15,6 @@ export const useSubmit: UseSubmit = (request) => {
   const isMounted = useIsMounted();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentRequest] = useState(() => request);
   const [result, setResult] = useState<Awaited<
     ReturnType<typeof request>
   > | null>(null);
@@ -27,7 +26,7 @@ export const useSubmit: UseSubmit = (request) => {
       try {
         if (isMounted()) {
           setIsSubmitting(true);
-          const result = await currentRequest();
+          const result = await request();
           setResult(() => result);
           setIsSubmitting(false);
         }
@@ -38,7 +37,7 @@ export const useSubmit: UseSubmit = (request) => {
         if (isMounted()) setIsSubmitting(false);
       }
     },
-    [currentRequest, isMounted]
+    [request, isMounted]
   );
 
   return [handleOnSubmit, result, isSubmitting] as const;

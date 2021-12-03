@@ -9,7 +9,7 @@ import { FormTitle } from 'src/modules/shared/components/Form/FormTitle';
 import { useForm, useSubmit } from 'src/modules/shared/hooks';
 import { LoginExpressRepository } from '../../repositories/LoginExpressRepository';
 import { Credentials } from '../../types';
-import { useAuthenticationState } from '../../providers';
+import { useAuthenticationDispatch } from '../../providers';
 import { authenticationAction } from '../../reducers/authentication';
 import { LocalStorageService } from 'src/modules/shared/services';
 import { useToast } from '@chakra-ui/toast';
@@ -22,7 +22,7 @@ const loginFormStyles: ChakraProps = {
 
 const LoginForm: React.FC = () => {
   const toast = useToast();
-  const authenticationState = useAuthenticationState();
+  const authDispatch = useAuthenticationDispatch();
 
   const { formValues: credentials, handleInputChange } = useForm<Credentials>({
     email: 'jperez.c92@gmail.com',
@@ -40,9 +40,7 @@ const LoginForm: React.FC = () => {
         tokenInitDate: new Date().toISOString(),
       });
 
-      return authenticationState.dispatch(
-        authenticationAction.login(result.payload.user)
-      );
+      return authDispatch(authenticationAction.login(result.payload.user));
     }
     if (result && !result.success) {
       toast({
@@ -50,7 +48,7 @@ const LoginForm: React.FC = () => {
         status: 'error',
       });
     }
-  }, [authenticationState, result, toast]);
+  }, [authDispatch, result, toast]);
 
   return (
     <>

@@ -8,6 +8,7 @@ import {
 import { Input, InputGroup, InputRightElement } from '@chakra-ui/input';
 import { ChakraProps } from '@chakra-ui/system';
 import { Tooltip } from '@chakra-ui/tooltip';
+import { useToast } from '@chakra-ui/toast';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import Form from 'src/modules/shared/components/Form';
@@ -15,10 +16,9 @@ import { FormTitle } from 'src/modules/shared/components/Form/FormTitle';
 import { useForm, useSubmit } from 'src/modules/shared/hooks';
 import { RegisterUserValues } from '../../types';
 import { RegisterExpressRepository } from '../../repositories/RegisterExpressRepository';
-import { useAuthenticationState } from '../../providers';
+import { useAuthenticationDispatch } from '../../providers';
 import { authenticationAction } from '../../reducers/authentication';
 import { LocalStorageService } from 'src/modules/shared/services';
-import { useToast } from '@chakra-ui/toast';
 
 const registerFormStyles: ChakraProps = {
   display: 'flex',
@@ -35,7 +35,7 @@ const registerFormInitialState: RegisterUserValues = {
 };
 
 const RegisterForm: React.FC = () => {
-  const authenticationState = useAuthenticationState();
+  const authDispatch = useAuthenticationDispatch();
   const toast = useToast();
   const { formValues, formErrors, handleInputChange } = useForm(
     registerFormInitialState
@@ -54,9 +54,7 @@ const RegisterForm: React.FC = () => {
         tokenInitDate: new Date().toISOString(),
       });
 
-      return authenticationState.dispatch(
-        authenticationAction.login(payload.user)
-      );
+      return authDispatch(authenticationAction.login(payload.user));
     }
 
     if (result && !result.success) {
@@ -65,7 +63,7 @@ const RegisterForm: React.FC = () => {
         status: 'error',
       });
     }
-  }, [authenticationState, result, toast]);
+  }, [authDispatch, result, toast]);
 
   return (
     <>
