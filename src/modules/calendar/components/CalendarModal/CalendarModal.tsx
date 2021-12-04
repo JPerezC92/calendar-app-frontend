@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, FormEventHandler, useEffect } from 'react';
+import React, { ChangeEventHandler, useCallback, useEffect } from 'react';
 import { Button } from '@chakra-ui/button';
 import {
   FormControl,
@@ -20,10 +20,16 @@ import { addHours, addMinutes, format, getTime, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
 
 import Form from 'src/modules/shared/components/Form';
-import { ToFormValues, useForm } from 'src/modules/shared/hooks';
-import { useCalendarEventState, useCalendarModalState } from '../../providers';
+import { ToFormValues, useForm, useSubmit } from 'src/modules/shared/hooks';
+import {
+  useCalendarEventDispatch,
+  useCalendarEventState,
+  useCalendarModalState,
+} from '../../providers';
 import { NewCalendarEvent } from '../../types';
 import { calendarEventAction } from '../../reducers/calendarEvent';
+import { UpdateEventExpressRepository } from '../../repositories/UpdateEventExpressRepository';
+import { CreateEventExpressRepository } from '../../repositories';
 
 const baseDate = parse(
   format(new Date(), 'yyyy-MM-dd HH:00:00'),
@@ -61,7 +67,8 @@ const newCalendarEventInitialState: ToFormValues<NewCalendarEvent> = {
 };
 
 const CalendarModal: React.FC = () => {
-  const { eventSelected, dispatch } = useCalendarEventState();
+  const { eventSelected } = useCalendarEventState();
+  const calendarEventDispatch = useCalendarEventDispatch();
   const isNewEvent = !eventSelected;
 
   const { formValues, formErrors, setFormValues, handleInputChange } =
@@ -69,7 +76,8 @@ const CalendarModal: React.FC = () => {
       isNewEvent
         ? newCalendarEventInitialState
         : {
-            ...eventSelected,
+            title: eventSelected.title,
+            notes: eventSelected.notes,
             start: new Date(eventSelected.start).getTime().toString(),
             end: new Date(eventSelected.end).getTime().toString(),
           }
@@ -97,26 +105,41 @@ const CalendarModal: React.FC = () => {
     }
   };
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
-    event.preventDefault();
+  const updateSubmit = useSubmit(
+    useCallback(async () => {
+      const result = await UpdateEventExpressRepository({
+        ...toCalendarEvent(formValues),
+        id: eventSelected?.id ?? '',
+      });
+      console.log('updated');
 
-    if (isNewEvent) {
-      dispatch(
-        calendarEventAction.addNewEvent({
-          ...toCalendarEvent(formValues),
-        })
-      );
-    } else {
-      dispatch(
-        calendarEventAction.updateEvent({
-          ...eventSelected,
-          ...toCalendarEvent(formValues),
-        })
-      );
+      if (result.success) {
+        calendarEventDispatch(calendarEventAction.updateEvent(result.payload));
+      }
+
+      return result;
+    }, [formValues, eventSelected, calendarEventDispatch])
+  );
+
+  const createSubmit = useSubmit(
+    useCallback(async () => {
+      const result = await CreateEventExpressRepository({
+        ...toCalendarEvent(formValues),
+      });
+
+      if (result.success) {
+        calendarEventDispatch(calendarEventAction.addNewEvent(result.payload));
+      }
+
+      return result;
+    }, [formValues, calendarEventDispatch])
+  );
+
+  useEffect(() => {
+    if (createSubmit[1]?.success || updateSubmit[1]?.success) {
+      closeModal();
     }
-
-    closeModal();
-  };
+  }, [closeModal, createSubmit, updateSubmit]);
 
   useEffect(() => {
     if (parseInt(formValues.end, 10) < parseInt(formValues.start, 10)) {
@@ -127,8 +150,9 @@ const CalendarModal: React.FC = () => {
   }, [formValues.start, formValues.end, setFormValues]);
 
   useEffect(
-    () => () => dispatch(calendarEventAction.removeEventSelected()),
-    [dispatch]
+    () => () =>
+      calendarEventDispatch(calendarEventAction.removeEventSelected()),
+    [calendarEventDispatch]
   );
 
   return (
@@ -148,7 +172,7 @@ const CalendarModal: React.FC = () => {
                 flexDirection="column"
                 gridRowGap={3}
                 marginBlock={3}
-                onSubmit={handleSubmit}
+                onSubmit={isNewEvent ? createSubmit[0] : updateSubmit[0]}
               >
                 <FormControl isInvalid={Boolean(formErrors.start)} isRequired>
                   <FormLabel>Fecha y hora inicio</FormLabel>

@@ -32,10 +32,7 @@ export const calendarEventReducer = (
     case CalendarEventActionEnum.ADD_NEW_EVENT:
       return {
         ...state,
-        events: [
-          ...state.events,
-          { ...action.payload, id: state.events.length + 1 },
-        ],
+        events: [...state.events, { ...action.payload }],
       };
 
     case CalendarEventActionEnum.UPDATE_EVENT:

@@ -30,7 +30,7 @@ export interface RemoveEventSelected {
 }
 export interface AddNewEvent {
   type: CalendarEventActionEnum.ADD_NEW_EVENT;
-  payload: NewCalendarEvent;
+  payload: CalendarEvent;
 }
 export interface UpdateEvent {
   type: CalendarEventActionEnum.UPDATE_EVENT;
