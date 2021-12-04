@@ -1,4 +1,3 @@
-import React from 'react';
 import { AuthenticationStateProvider } from 'src/modules/auth/providers';
 
 export const CustomProviders: React.FC = ({ children }) => {

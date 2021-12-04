@@ -3,39 +3,54 @@ import {
   Dispatch,
   ReducerAction,
   useContext,
-  useEffect,
   useReducer,
-  useRef,
 } from 'react';
 
-import {
-  calendarEventAction,
-  calendarEventReducer,
-} from '../reducers/calendarEvent';
+import { calendarEventReducer } from '../reducers/calendarEvent';
 import { CalendarEvent } from '../types';
-import { GetEventsExpressRepository } from '../repositories/GetEventsExpressRepository';
-import { useQueryRequest } from 'src/modules/shared/hooks';
-import LoadingSpinner from 'src/modules/shared/components/LoadingSpinner';
 
 export interface CalendarEventState {
   events: CalendarEvent[];
   eventSelected?: CalendarEvent;
-  dispatch: Dispatch<ReducerAction<typeof calendarEventReducer>>;
 }
+
+type CalendarEventDispatcher = Dispatch<
+  ReducerAction<typeof calendarEventReducer>
+>;
 
 const initialCalendarEventState: CalendarEventState = {
   events: [],
   eventSelected: undefined,
-  dispatch: (state) => state,
 };
 
 const CalendarEventStateContext = createContext({} as CalendarEventState);
 
+/*
+ * This is a custom hook that allows us to access the state of the CalendarEventStateContext
+ */
 export const useCalendarEventState = () => {
   const context = useContext(CalendarEventStateContext);
   if (!context) {
     throw new Error(
       'useCalendarEventState must be used within a CalendarEventStateProvider'
+    );
+  }
+  return context;
+};
+
+const CalendarEventDispatchContext = createContext<CalendarEventDispatcher>(
+  (state) => state
+);
+
+/*
+ * This is a custom hook that allows us to dispatch actions to the CalendarEventState
+ * It is used in the CalendarEventStateProvider to provide the dispatcher to its children
+ */
+export const useCalendarEventDispatch = () => {
+  const context = useContext(CalendarEventDispatchContext);
+  if (!context) {
+    throw new Error(
+      'useCalendarEventDispatch must be used within a CalendarEventStateProvider'
     );
   }
   return context;
@@ -47,19 +62,13 @@ export const CalendarEventStateProvider: React.FC = ({ children }) => {
     initialCalendarEventState
   );
 
-  const [result, isLoading] = useQueryRequest(GetEventsExpressRepository);
-
-  useEffect(() => {
-    if (result?.success) {
-      dispatch(calendarEventAction.setEvents(result.payload));
-    }
-  }, [result]);
-
   return (
     <>
-      <CalendarEventStateContext.Provider value={{ ...state, dispatch }}>
-        {isLoading ? <LoadingSpinner /> : children}
-      </CalendarEventStateContext.Provider>
+      <CalendarEventDispatchContext.Provider value={dispatch}>
+        <CalendarEventStateContext.Provider value={state}>
+          {children}
+        </CalendarEventStateContext.Provider>
+      </CalendarEventDispatchContext.Provider>
     </>
   );
 };

@@ -11,6 +11,10 @@ interface UseSubmit {
   ];
 }
 
+/*
+ * If you provide a request in a callback function, wrap it in a useCallback
+ * to avoid unnecessary computation.
+ */
 export const useSubmit: UseSubmit = (request) => {
   const isMounted = useIsMounted();
 
@@ -32,12 +36,13 @@ export const useSubmit: UseSubmit = (request) => {
         }
       } catch (error) {
         console.log(error);
-        if (isMounted()) setResult(() => null);
-      } finally {
-        if (isMounted()) setIsSubmitting(false);
+        if (isMounted()) {
+          setResult(() => null);
+          setIsSubmitting(() => false);
+        }
       }
     },
-    [request, isMounted]
+    [isMounted, request]
   );
 
   return [handleOnSubmit, result, isSubmitting] as const;

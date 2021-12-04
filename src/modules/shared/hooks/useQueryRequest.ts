@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useIsMounted } from './useIsMounted';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
@@ -10,11 +10,13 @@ interface UseQueryRequest {
   ];
 }
 
+/*
+ * If you provide a request in a callback function, wrap it in a useCallback
+ * to avoid unnecessary re-renders.
+ */
 export const useQueryRequest: UseQueryRequest = (request) => {
   const isMounted = useIsMounted();
-
-  const [currentRequest] = useState(() => request);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [result, setResult] = useState<Awaited<
     ReturnType<typeof request>
   > | null>(null);
@@ -22,18 +24,18 @@ export const useQueryRequest: UseQueryRequest = (request) => {
   const fetchData = useCallback(async () => {
     try {
       if (isMounted()) {
-        setIsLoading(() => true);
-        const result = await currentRequest();
+        const result = await request();
         setResult(() => result);
         setIsLoading(() => false);
       }
     } catch (error) {
       console.log(error);
-      if (isMounted()) setResult(() => null);
-    } finally {
-      if (isMounted()) setIsLoading(() => false);
+      if (isMounted()) {
+        setResult(() => null);
+        setIsLoading(() => false);
+      }
     }
-  }, [isMounted, currentRequest]);
+  }, [isMounted, request]);
 
   useEffect(() => {
     fetchData();

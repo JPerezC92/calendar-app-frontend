@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ChakraProps } from '@chakra-ui/system';
 import { FormControl, FormLabel } from '@chakra-ui/form-control';
 import { Input } from '@chakra-ui/input';
@@ -29,9 +29,12 @@ const LoginForm: React.FC = () => {
     password: '123456aA',
   });
 
-  const [handleSubmit, result, isSubmitting] = useSubmit(() =>
-    LoginExpressRepository(credentials)
+  const loginRequest = useCallback(
+    () => LoginExpressRepository(credentials),
+    [credentials]
   );
+
+  const [handleSubmit, result, isSubmitting] = useSubmit(loginRequest);
 
   useEffect(() => {
     if (result?.success) {

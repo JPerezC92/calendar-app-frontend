@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Button } from '@chakra-ui/button';
 import {
   FormControl,
@@ -40,10 +40,11 @@ const RegisterForm: React.FC = () => {
   const { formValues, formErrors, handleInputChange } = useForm(
     registerFormInitialState
   );
-
-  const [handleSubmit, result, isLoading] = useSubmit(() =>
-    RegisterExpressRepository(formValues)
+  const registerRequest = useCallback(
+    () => RegisterExpressRepository(formValues),
+    [formValues]
   );
+  const [handleSubmit, result, isLoading] = useSubmit(registerRequest);
 
   useEffect(() => {
     if (result?.success) {

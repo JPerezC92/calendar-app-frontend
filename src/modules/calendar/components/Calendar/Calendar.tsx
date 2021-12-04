@@ -1,4 +1,4 @@
-import { CSSProperties, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/layout';
 import {
   Calendar as ReactBigCalendar,
@@ -12,13 +12,19 @@ import { ApplicationSide } from 'src/modules/shared/utils/ApplicationSide';
 import EventReminder from '../EventReminder';
 import CalendarModal from '../CalendarModal';
 import { useCalendarModalState } from '../../providers/ModalStateProvider';
-import { useCalendarEventState } from '../../providers';
+import {
+  useCalendarEventDispatch,
+  useCalendarEventState,
+} from '../../providers';
 import CreateCalendarEventFab from '../CreateCalendarEventFab';
 import DeleteCalendarEventFab from '../DeleteCalendarEventFab';
 import { calendarEventAction } from '../../reducers/calendarEvent';
 import { localizer } from './localizer';
 import type { CalendarEvent } from '../../types';
 import { LocalStorageService } from 'src/modules/shared/services';
+import { useQueryRequest } from 'src/modules/shared/hooks';
+import { GetEventsExpressRepository } from '../../repositories/GetEventsExpressRepository';
+import LoadingSpinner from 'src/modules/shared/components/LoadingSpinner';
 
 type ReactBigCalendarProps = RBCalendarProps<CalendarEvent>;
 
@@ -31,6 +37,7 @@ const Calendar: React.FC = () => {
 
   const calendarModalState = useCalendarModalState();
   const calendarEventState = useCalendarEventState();
+  const calendarEventDispatch = useCalendarEventDispatch();
 
   const onDoubleClickEvent: ReactBigCalendarProps['onDoubleClickEvent'] =
     () => {
@@ -38,7 +45,7 @@ const Calendar: React.FC = () => {
     };
 
   const onSelectEvent: ReactBigCalendarProps['onSelectEvent'] = (event) => {
-    calendarEventState.dispatch(
+    calendarEventDispatch(
       calendarEventAction.setEventSelected({
         ...event,
       })
@@ -47,7 +54,7 @@ const Calendar: React.FC = () => {
 
   const onSelectSlot: ReactBigCalendarProps['onSelectSlot'] = (slotInfo) => {
     console.log(slotInfo);
-    calendarEventState.dispatch(calendarEventAction.removeEventSelected());
+    calendarEventDispatch(calendarEventAction.removeEventSelected());
   };
 
   const onViewChange: ReactBigCalendarProps['onView'] = (event) => {
@@ -74,6 +81,18 @@ const Calendar: React.FC = () => {
     };
   };
 
+  const [result, isLoading] = useQueryRequest(GetEventsExpressRepository);
+
+  useEffect(() => {
+    if (result?.success) {
+      calendarEventDispatch(calendarEventAction.setEvents(result.payload));
+    }
+  }, [result, calendarEventDispatch]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <>
       <Box p={2} height="100%">
@@ -99,7 +118,7 @@ const Calendar: React.FC = () => {
         {calendarEventState.eventSelected && (
           <DeleteCalendarEventFab
             onClick={() =>
-              calendarEventState.dispatch(calendarEventAction.deleteEvent())
+              calendarEventDispatch(calendarEventAction.deleteEvent())
             }
           />
         )}
