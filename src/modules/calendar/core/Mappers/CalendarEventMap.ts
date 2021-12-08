@@ -91,6 +91,14 @@ export class CalendarEventMap {
     };
   }
 
+  public static toReactBigCalendarEventCollection(
+    calendarEventCollection: CalendarEvent[]
+  ): ReactBigCalendarEvent[] {
+    return calendarEventCollection.map((calendarEvent) =>
+      this.toReactBigCalendarEvent(calendarEvent)
+    );
+  }
+
   public static fromReactBigCalendarEvent(
     calendarEvent: ReactBigCalendarEvent
   ): CalendarEvent {

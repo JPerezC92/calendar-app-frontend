@@ -28,7 +28,7 @@ import { ReactBigCalendarEvent } from '../../core/Domain';
 import { CalendarEventMap } from '../../core/Mappers/CalendarEventMap';
 import { DeleteEventExpressRepository } from '../../repositories';
 
-type ReactBigCalendarProps = RBCalendarProps<ReactBigCalendarEvent>;
+type MyRBCProps = RBCalendarProps<ReactBigCalendarEvent>;
 
 const Calendar: React.FC = () => {
   const view = LocalStorageService.get('lastView');
@@ -38,15 +38,14 @@ const Calendar: React.FC = () => {
   );
 
   const calendarModalState = useCalendarModalState();
-  const calendarEventState = useCalendarEventState();
+  const { events, eventSelected } = useCalendarEventState();
   const calendarEventDispatch = useCalendarEventDispatch();
 
-  const onDoubleClickEvent: ReactBigCalendarProps['onDoubleClickEvent'] =
-    () => {
-      calendarModalState.openModal();
-    };
+  const onDoubleClickEvent: MyRBCProps['onDoubleClickEvent'] = () => {
+    calendarModalState.openModal();
+  };
 
-  const onSelectEvent: ReactBigCalendarProps['onSelectEvent'] = (event) => {
+  const onSelectEvent: MyRBCProps['onSelectEvent'] = (event) => {
     calendarEventDispatch(
       calendarEventAction.setEventSelected(
         CalendarEventMap.fromReactBigCalendarEvent(event)
@@ -54,22 +53,16 @@ const Calendar: React.FC = () => {
     );
   };
 
-  const onSelectSlot: ReactBigCalendarProps['onSelectSlot'] = (slotInfo) => {
-    console.log(slotInfo);
+  const onSelectSlot: MyRBCProps['onSelectSlot'] = () => {
     calendarEventDispatch(calendarEventAction.removeEventSelected());
   };
 
-  const onViewChange: ReactBigCalendarProps['onView'] = (event) => {
+  const onViewChange: MyRBCProps['onView'] = (event) => {
     setLastView(() => event);
     LocalStorageService.save('lastView', event);
   };
 
-  const eventStyleGetter: ReactBigCalendarProps['eventPropGetter'] = (
-    event,
-    start,
-    end,
-    isSelected
-  ) => {
+  const eventStyleGetter: MyRBCProps['eventPropGetter'] = () => {
     const newStyle: CSSProperties = {
       backgroundColor: '#367CF7',
       borderRadius: '0px',
@@ -83,12 +76,10 @@ const Calendar: React.FC = () => {
     };
   };
 
-  const [handleOnClick] = useRequestHandler(
+  const [handleOnClickDelete] = useRequestHandler(
     useCallback(async () => {
-      if (calendarEventState.eventSelected) {
-        const result = await DeleteEventExpressRepository(
-          calendarEventState.eventSelected
-        );
+      if (eventSelected) {
+        const result = await DeleteEventExpressRepository(eventSelected);
 
         if (result.success) {
           calendarEventDispatch(calendarEventAction.deleteEvent());
@@ -96,18 +87,18 @@ const Calendar: React.FC = () => {
 
         return result;
       }
-    }, [calendarEventDispatch, calendarEventState.eventSelected])
+    }, [calendarEventDispatch, eventSelected])
   );
 
   const [result, isLoading] = useRequest(GetEventsExpressRepository);
 
   useEffect(() => {
     if (result?.success) {
-      calendarEventDispatch(
-        calendarEventAction.setEvents(
-          CalendarEventMap.toEntityCollection(result.payload)
-        )
+      const calendarEvents = CalendarEventMap.toEntityCollection(
+        result.payload
       );
+
+      calendarEventDispatch(calendarEventAction.setEvents(calendarEvents));
     }
   }, [result, calendarEventDispatch]);
 
@@ -121,9 +112,7 @@ const Calendar: React.FC = () => {
         <ReactBigCalendar
           localizer={localizer}
           culture="es"
-          events={calendarEventState.events.map((event) =>
-            CalendarEventMap.toReactBigCalendarEvent(event)
-          )}
+          events={CalendarEventMap.toReactBigCalendarEventCollection(events)}
           startAccessor="start"
           endAccessor="end"
           messages={messages}
@@ -139,8 +128,8 @@ const Calendar: React.FC = () => {
           }}
         />
 
-        {calendarEventState.eventSelected && (
-          <DeleteCalendarEventFab onClick={handleOnClick} />
+        {eventSelected && (
+          <DeleteCalendarEventFab onClick={handleOnClickDelete} />
         )}
 
         <CreateCalendarEventFab
@@ -151,7 +140,7 @@ const Calendar: React.FC = () => {
         />
 
         {calendarModalState.isOpen && (
-          <CalendarModal calendarEvent={calendarEventState.eventSelected} />
+          <CalendarModal calendarEvent={eventSelected} />
         )}
       </Box>
     </>
