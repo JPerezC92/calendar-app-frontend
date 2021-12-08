@@ -8,7 +8,9 @@ import {
 
 const sanitize = (object: Record<string, unknown>) => {
   return Object.fromEntries(
-    Object.entries(object).filter(([, value]) => value && value !== '')
+    Object.entries(object).filter(
+      ([, value]) => typeof value !== 'undefined' && value !== null
+    )
   );
 };
 
