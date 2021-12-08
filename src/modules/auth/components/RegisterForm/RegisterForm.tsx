@@ -13,7 +13,7 @@ import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 import Form from 'src/modules/shared/components/Form';
 import { FormTitle } from 'src/modules/shared/components/Form/FormTitle';
-import { useForm, useSubmit } from 'src/modules/shared/hooks';
+import { useForm, useRequestHandler } from 'src/modules/shared/hooks';
 import { RegisterUserValues } from '../../types';
 import { RegisterExpressRepository } from '../../repositories/RegisterExpressRepository';
 import { useAuthenticationDispatch } from '../../providers';
@@ -44,7 +44,7 @@ const RegisterForm: React.FC = () => {
     () => RegisterExpressRepository(formValues),
     [formValues]
   );
-  const [handleSubmit, result, isLoading] = useSubmit(registerRequest);
+  const [handleSubmit, result, isLoading] = useRequestHandler(registerRequest);
 
   useEffect(() => {
     if (result?.success) {

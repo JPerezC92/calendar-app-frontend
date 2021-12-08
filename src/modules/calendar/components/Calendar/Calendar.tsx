@@ -1,4 +1,4 @@
-import { CSSProperties, useEffect, useState } from 'react';
+import { CSSProperties, useCallback, useEffect, useState } from 'react';
 import { Box } from '@chakra-ui/layout';
 import {
   Calendar as ReactBigCalendar,
@@ -21,11 +21,12 @@ import DeleteCalendarEventFab from '../DeleteCalendarEventFab';
 import { calendarEventAction } from '../../reducers/calendarEvent';
 import { localizer } from './localizer';
 import { LocalStorageService } from 'src/modules/shared/services';
-import { useQueryRequest } from 'src/modules/shared/hooks';
+import { useRequest, useRequestHandler } from 'src/modules/shared/hooks';
 import { GetEventsExpressRepository } from '../../repositories/GetEventsExpressRepository';
 import LoadingSpinner from 'src/modules/shared/components/LoadingSpinner';
 import { ReactBigCalendarEvent } from '../../core/Domain';
 import { CalendarEventMap } from '../../core/Mappers/CalendarEventMap';
+import { DeleteEventExpressRepository } from '../../repositories';
 
 type ReactBigCalendarProps = RBCalendarProps<ReactBigCalendarEvent>;
 
@@ -82,7 +83,23 @@ const Calendar: React.FC = () => {
     };
   };
 
-  const [result, isLoading] = useQueryRequest(GetEventsExpressRepository);
+  const [handleOnClick] = useRequestHandler(
+    useCallback(async () => {
+      if (calendarEventState.eventSelected) {
+        const result = await DeleteEventExpressRepository(
+          calendarEventState.eventSelected
+        );
+
+        if (result.success) {
+          calendarEventDispatch(calendarEventAction.deleteEvent());
+        }
+
+        return result;
+      }
+    }, [calendarEventDispatch, calendarEventState.eventSelected])
+  );
+
+  const [result, isLoading] = useRequest(GetEventsExpressRepository);
 
   useEffect(() => {
     if (result?.success) {
@@ -123,11 +140,7 @@ const Calendar: React.FC = () => {
         />
 
         {calendarEventState.eventSelected && (
-          <DeleteCalendarEventFab
-            onClick={() =>
-              calendarEventDispatch(calendarEventAction.deleteEvent())
-            }
-          />
+          <DeleteCalendarEventFab onClick={handleOnClick} />
         )}
 
         <CreateCalendarEventFab

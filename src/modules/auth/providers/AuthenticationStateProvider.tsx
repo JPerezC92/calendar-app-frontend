@@ -7,7 +7,7 @@ import {
   useReducer,
 } from 'react';
 import LoadingSpinner from 'src/modules/shared/components/LoadingSpinner';
-import { useQueryRequest } from 'src/modules/shared/hooks';
+import { useRequest } from 'src/modules/shared/hooks';
 import { LocalStorageService } from 'src/modules/shared/services';
 import {
   authenticationAction,
@@ -72,7 +72,7 @@ export const AuthenticationStateProvider: React.FC = ({ children }) => {
     initialAuthenticationState
   );
 
-  const [result, isLoading] = useQueryRequest(RenewTokenExpressRepository);
+  const [result, isLoading] = useRequest(RenewTokenExpressRepository);
 
   useEffect(() => {
     if (result?.success) {

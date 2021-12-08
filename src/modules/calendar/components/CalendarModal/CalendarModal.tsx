@@ -20,7 +20,7 @@ import { addHours, addMinutes, format, getTime, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
 
 import Form from 'src/modules/shared/components/Form';
-import { useForm, useSubmit } from 'src/modules/shared/hooks';
+import { useForm, useRequestHandler } from 'src/modules/shared/hooks';
 import {
   useCalendarEventDispatch,
   useCalendarModalState,
@@ -125,7 +125,7 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
     return result;
   }, [formValues, calendarEventDispatch]);
 
-  const [handleSubmit, result, isLoading] = useSubmit(
+  const [handleSubmit, result, isLoading] = useRequestHandler(
     calendarEvent ? createRequest : updateRequest
   );
 

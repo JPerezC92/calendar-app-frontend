@@ -6,7 +6,7 @@ import { Button } from '@chakra-ui/button';
 
 import Form from 'src/modules/shared/components/Form';
 import { FormTitle } from 'src/modules/shared/components/Form/FormTitle';
-import { useForm, useSubmit } from 'src/modules/shared/hooks';
+import { useForm, useRequestHandler } from 'src/modules/shared/hooks';
 import { LoginExpressRepository } from '../../repositories/LoginExpressRepository';
 import { Credentials } from '../../types';
 import { useAuthenticationDispatch } from '../../providers';
@@ -34,7 +34,7 @@ const LoginForm: React.FC = () => {
     [credentials]
   );
 
-  const [handleSubmit, result, isSubmitting] = useSubmit(loginRequest);
+  const [handleSubmit, result, isSubmitting] = useRequestHandler(loginRequest);
 
   useEffect(() => {
     if (result?.success) {

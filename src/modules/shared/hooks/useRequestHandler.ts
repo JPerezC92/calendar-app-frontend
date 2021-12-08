@@ -1,11 +1,11 @@
-import { FormEventHandler, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useIsMounted } from './useIsMounted';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
-interface UseSubmit {
+interface UseRequestHandler {
   <Result>(request: () => Promise<Result>): readonly [
-    handleOnSubmit: FormEventHandler<HTMLFormElement>,
+    handleOnSubmit: (event?: React.FormEvent<HTMLFormElement>) => void,
     result: Result | null,
     isSubmitting: boolean
   ];
@@ -15,7 +15,7 @@ interface UseSubmit {
  * If you provide a request in a callback function, wrap it in a useCallback
  * to avoid unnecessary computation.
  */
-export const useSubmit: UseSubmit = (request) => {
+export const useRequestHandler: UseRequestHandler = (request) => {
   const isMounted = useIsMounted();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,9 +23,9 @@ export const useSubmit: UseSubmit = (request) => {
     ReturnType<typeof request>
   > | null>(null);
 
-  const handleOnSubmit: FormEventHandler<HTMLFormElement> = useCallback(
-    async (event) => {
-      event.preventDefault();
+  const handleOnSubmit = useCallback(
+    async (event?: React.FormEvent<HTMLFormElement>) => {
+      event && event.preventDefault();
 
       try {
         if (isMounted()) {

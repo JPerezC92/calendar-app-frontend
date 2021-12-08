@@ -3,7 +3,7 @@ import { useIsMounted } from './useIsMounted';
 
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
-interface UseQueryRequest {
+interface UseRequest {
   <Result>(request: () => Promise<Result>): readonly [
     result: Result | null,
     isLoading: boolean
@@ -14,7 +14,7 @@ interface UseQueryRequest {
  * If you provide a request in a callback function, wrap it in a useCallback
  * to avoid unnecessary re-renders.
  */
-export const useQueryRequest: UseQueryRequest = (request) => {
+export const useRequest: UseRequest = (request) => {
   const isMounted = useIsMounted();
   const [isLoading, setIsLoading] = useState(true);
   const [result, setResult] = useState<Awaited<
