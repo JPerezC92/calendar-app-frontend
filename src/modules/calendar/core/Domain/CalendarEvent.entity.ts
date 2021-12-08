@@ -5,15 +5,23 @@ interface CalendarEventProps {
   readonly title: string;
   readonly start: Date;
   readonly end: Date;
-  readonly userId: string;
+  readonly userId?: string;
 }
 
-export interface CalendarEventDTO {
+export type CalendarEventDTO = {
   id?: string;
   title: string;
   notes: string;
   start: string;
   end: string;
+  userId?: string;
+};
+export interface ReactBigCalendarEvent {
+  id?: string;
+  title: string;
+  notes: string;
+  start: Date;
+  end: Date;
   userId?: string;
 }
 
@@ -23,7 +31,10 @@ export class CalendarEvent extends Entity {
   }
   public readonly props: CalendarEventProps;
 
-  private constructor(props: CalendarEventProps, id?: UniqueEntityID) {
+  private constructor(
+    props: Required<CalendarEventProps>,
+    id?: UniqueEntityID
+  ) {
     super(id);
     this.props = props;
   }
@@ -32,6 +43,6 @@ export class CalendarEvent extends Entity {
     props: CalendarEventProps,
     id?: UniqueEntityID
   ): CalendarEvent {
-    return new CalendarEvent(props, id);
+    return new CalendarEvent({ ...props, userId: props.userId ?? '' }, id);
   }
 }

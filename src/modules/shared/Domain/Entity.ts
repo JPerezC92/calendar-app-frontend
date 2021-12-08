@@ -1,7 +1,7 @@
 import { Identifier } from './Identifier';
 
-export class UniqueEntityID extends Identifier<string | number | undefined> {
-  constructor(id?: string | number) {
+export class UniqueEntityID extends Identifier<string | undefined> {
+  constructor(id?: string) {
     super(id);
   }
 }

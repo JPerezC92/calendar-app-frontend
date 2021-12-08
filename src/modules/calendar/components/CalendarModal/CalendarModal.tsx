@@ -52,16 +52,6 @@ const dateToDateTimeString = (date: Date): string => {
   return format(date, "yyyy-MM-dd'T'HH:mm");
 };
 
-// const toCalendarEvent = (
-//   calendarEventFormValues: ToFormValues<CalendarEventFormValues>
-// ): CalendarEventFormValues => {
-//   return {
-//     ...calendarEventFormValues,
-//     end: new Date(parseInt(calendarEventFormValues.end, 10)),
-//     start: new Date(parseInt(calendarEventFormValues.start, 10)),
-//   };
-// };
-
 const newCalendarEventInitialState: CalendarEventFormValues = {
   title: '',
   notes: '',
@@ -78,7 +68,7 @@ const CalendarModal: React.FC = () => {
     useForm<CalendarEventFormValues>(
       isNewEvent
         ? newCalendarEventInitialState
-        : CalendarEventMap.fromEntityToFormValues(eventSelected)
+        : CalendarEventMap.toFormValues(eventSelected)
     );
 
   const { isOpen, closeModal } = useCalendarModalState();
@@ -106,7 +96,7 @@ const CalendarModal: React.FC = () => {
   const updateSubmit = useSubmit(
     useCallback(async () => {
       const result = await UpdateEventExpressRepository(
-        CalendarEventMap.fromFormValuesToEntity(
+        CalendarEventMap.fromFormValues(
           formValues,
           eventSelected?.id.toString()
         )
@@ -116,7 +106,7 @@ const CalendarModal: React.FC = () => {
       if (result.success) {
         calendarEventDispatch(
           calendarEventAction.updateEvent(
-            CalendarEventMap.fromDTOToEntity(result.payload)
+            CalendarEventMap.fromDTO(result.payload)
           )
         );
       }
@@ -128,13 +118,13 @@ const CalendarModal: React.FC = () => {
   const createSubmit = useSubmit(
     useCallback(async () => {
       const result = await CreateEventExpressRepository(
-        CalendarEventMap.fromFormValuesToEntity(formValues)
+        CalendarEventMap.fromFormValues(formValues)
       );
 
       if (result.success) {
         calendarEventDispatch(
           calendarEventAction.addNewEvent(
-            CalendarEventMap.fromDTOToEntity(result.payload)
+            CalendarEventMap.fromDTO(result.payload)
           )
         );
       }

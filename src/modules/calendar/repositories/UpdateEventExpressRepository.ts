@@ -7,7 +7,6 @@ export const UpdateEventExpressRepository: UpdateEventRepository = async (
   calendarEvent
 ) => {
   const body = CalendarEventMap.entityToRequest(calendarEvent);
-  console.log('kehkhe', body);
   const response = await fetcher({
     input: EventApiRoute.UPDATE(calendarEvent.id.toString() ?? ''),
     init: {

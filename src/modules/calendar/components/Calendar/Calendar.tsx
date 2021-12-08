@@ -24,10 +24,10 @@ import { LocalStorageService } from 'src/modules/shared/services';
 import { useQueryRequest } from 'src/modules/shared/hooks';
 import { GetEventsExpressRepository } from '../../repositories/GetEventsExpressRepository';
 import LoadingSpinner from 'src/modules/shared/components/LoadingSpinner';
-import { CalendarEventDTO } from '../../core/Domain';
+import { ReactBigCalendarEvent } from '../../core/Domain';
 import { CalendarEventMap } from '../../core/Mappers/CalendarEventMap';
 
-type ReactBigCalendarProps = RBCalendarProps<CalendarEventDTO>;
+type ReactBigCalendarProps = RBCalendarProps<ReactBigCalendarEvent>;
 
 const Calendar: React.FC = () => {
   const view = LocalStorageService.get('lastView');
@@ -48,7 +48,7 @@ const Calendar: React.FC = () => {
   const onSelectEvent: ReactBigCalendarProps['onSelectEvent'] = (event) => {
     calendarEventDispatch(
       calendarEventAction.setEventSelected(
-        CalendarEventMap.fromDTOToEntity(event)
+        CalendarEventMap.fromReactBigCalendarEvent(event)
       )
     );
   };
@@ -105,7 +105,7 @@ const Calendar: React.FC = () => {
           localizer={localizer}
           culture="es"
           events={calendarEventState.events.map((event) =>
-            CalendarEventMap.fromEntityToDTO(event)
+            CalendarEventMap.toReactBigCalendarEvent(event)
           )}
           startAccessor="start"
           endAccessor="end"

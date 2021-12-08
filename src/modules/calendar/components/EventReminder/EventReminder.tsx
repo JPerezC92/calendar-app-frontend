@@ -1,10 +1,12 @@
 import React from 'react';
 import { EventProps } from 'react-big-calendar';
-import { CalendarEventDTO } from '../../core/Domain';
+import { ReactBigCalendarEvent } from '../../core/Domain';
 
 // interface EventReminderProps {}
 
-const EventReminder: React.FC<EventProps<CalendarEventDTO>> = ({ event }) => {
+const EventReminder: React.FC<EventProps<ReactBigCalendarEvent>> = ({
+  event,
+}) => {
   // TODO user type passtrougth
   const { title } = event;
   return (
