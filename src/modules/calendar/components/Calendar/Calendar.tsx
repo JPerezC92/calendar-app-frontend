@@ -20,13 +20,14 @@ import CreateCalendarEventFab from '../CreateCalendarEventFab';
 import DeleteCalendarEventFab from '../DeleteCalendarEventFab';
 import { calendarEventAction } from '../../reducers/calendarEvent';
 import { localizer } from './localizer';
-import type { CalendarEvent } from '../../types';
 import { LocalStorageService } from 'src/modules/shared/services';
 import { useQueryRequest } from 'src/modules/shared/hooks';
 import { GetEventsExpressRepository } from '../../repositories/GetEventsExpressRepository';
 import LoadingSpinner from 'src/modules/shared/components/LoadingSpinner';
+import { CalendarEventDTO } from '../../core/Domain';
+import { CalendarEventMap } from '../../core/Mappers/CalendarEventMap';
 
-type ReactBigCalendarProps = RBCalendarProps<CalendarEvent>;
+type ReactBigCalendarProps = RBCalendarProps<CalendarEventDTO>;
 
 const Calendar: React.FC = () => {
   const view = LocalStorageService.get('lastView');
@@ -46,9 +47,9 @@ const Calendar: React.FC = () => {
 
   const onSelectEvent: ReactBigCalendarProps['onSelectEvent'] = (event) => {
     calendarEventDispatch(
-      calendarEventAction.setEventSelected({
-        ...event,
-      })
+      calendarEventAction.setEventSelected(
+        CalendarEventMap.fromDTOToEntity(event)
+      )
     );
   };
 
@@ -85,7 +86,11 @@ const Calendar: React.FC = () => {
 
   useEffect(() => {
     if (result?.success) {
-      calendarEventDispatch(calendarEventAction.setEvents(result.payload));
+      calendarEventDispatch(
+        calendarEventAction.setEvents(
+          CalendarEventMap.toEntityCollection(result.payload)
+        )
+      );
     }
   }, [result, calendarEventDispatch]);
 
@@ -99,7 +104,9 @@ const Calendar: React.FC = () => {
         <ReactBigCalendar
           localizer={localizer}
           culture="es"
-          events={calendarEventState.events}
+          events={calendarEventState.events.map((event) =>
+            CalendarEventMap.fromEntityToDTO(event)
+          )}
           startAccessor="start"
           endAccessor="end"
           messages={messages}

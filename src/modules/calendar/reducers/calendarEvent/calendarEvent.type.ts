@@ -1,4 +1,4 @@
-import { CalendarEvent, NewCalendarEvent } from '../../types';
+import { CalendarEvent } from '../../core/Domain';
 
 export enum CalendarEventActionEnum {
   SET_EVENTS = 'SET_EVENTS',

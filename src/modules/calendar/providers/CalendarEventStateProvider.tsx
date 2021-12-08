@@ -5,9 +5,9 @@ import {
   useContext,
   useReducer,
 } from 'react';
+import { CalendarEvent } from '../core/Domain';
 
 import { calendarEventReducer } from '../reducers/calendarEvent';
-import { CalendarEvent } from '../types';
 
 export interface CalendarEventState {
   events: CalendarEvent[];

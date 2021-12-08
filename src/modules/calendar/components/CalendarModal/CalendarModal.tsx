@@ -20,16 +20,19 @@ import { addHours, addMinutes, format, getTime, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
 
 import Form from 'src/modules/shared/components/Form';
-import { ToFormValues, useForm, useSubmit } from 'src/modules/shared/hooks';
+import { useForm, useSubmit } from 'src/modules/shared/hooks';
 import {
   useCalendarEventDispatch,
   useCalendarEventState,
   useCalendarModalState,
 } from '../../providers';
-import { NewCalendarEvent } from '../../types';
+import { CalendarEventFormValues } from '../../types';
 import { calendarEventAction } from '../../reducers/calendarEvent';
-import { UpdateEventExpressRepository } from '../../repositories/UpdateEventExpressRepository';
-import { CreateEventExpressRepository } from '../../repositories';
+import {
+  CreateEventExpressRepository,
+  UpdateEventExpressRepository,
+} from '../../repositories';
+import { CalendarEventMap } from '../../core/Mappers/CalendarEventMap';
 
 const baseDate = parse(
   format(new Date(), 'yyyy-MM-dd HH:00:00'),
@@ -49,17 +52,17 @@ const dateToDateTimeString = (date: Date): string => {
   return format(date, "yyyy-MM-dd'T'HH:mm");
 };
 
-const toCalendarEvent = (
-  calendarEventFormValues: ToFormValues<NewCalendarEvent>
-): NewCalendarEvent => {
-  return {
-    ...calendarEventFormValues,
-    end: new Date(parseInt(calendarEventFormValues.end, 10)),
-    start: new Date(parseInt(calendarEventFormValues.start, 10)),
-  };
-};
+// const toCalendarEvent = (
+//   calendarEventFormValues: ToFormValues<CalendarEventFormValues>
+// ): CalendarEventFormValues => {
+//   return {
+//     ...calendarEventFormValues,
+//     end: new Date(parseInt(calendarEventFormValues.end, 10)),
+//     start: new Date(parseInt(calendarEventFormValues.start, 10)),
+//   };
+// };
 
-const newCalendarEventInitialState: ToFormValues<NewCalendarEvent> = {
+const newCalendarEventInitialState: CalendarEventFormValues = {
   title: '',
   notes: '',
   start: initialStartDate,
@@ -72,15 +75,10 @@ const CalendarModal: React.FC = () => {
   const isNewEvent = !eventSelected;
 
   const { formValues, formErrors, setFormValues, handleInputChange } =
-    useForm<NewCalendarEvent>(
+    useForm<CalendarEventFormValues>(
       isNewEvent
         ? newCalendarEventInitialState
-        : {
-            title: eventSelected.title,
-            notes: eventSelected.notes,
-            start: new Date(eventSelected.start).getTime().toString(),
-            end: new Date(eventSelected.end).getTime().toString(),
-          }
+        : CalendarEventMap.fromEntityToFormValues(eventSelected)
     );
 
   const { isOpen, closeModal } = useCalendarModalState();
@@ -107,14 +105,20 @@ const CalendarModal: React.FC = () => {
 
   const updateSubmit = useSubmit(
     useCallback(async () => {
-      const result = await UpdateEventExpressRepository({
-        ...toCalendarEvent(formValues),
-        id: eventSelected?.id ?? '',
-      });
+      const result = await UpdateEventExpressRepository(
+        CalendarEventMap.fromFormValuesToEntity(
+          formValues,
+          eventSelected?.id.toString()
+        )
+      );
       console.log('updated');
 
       if (result.success) {
-        calendarEventDispatch(calendarEventAction.updateEvent(result.payload));
+        calendarEventDispatch(
+          calendarEventAction.updateEvent(
+            CalendarEventMap.fromDTOToEntity(result.payload)
+          )
+        );
       }
 
       return result;
@@ -123,12 +127,16 @@ const CalendarModal: React.FC = () => {
 
   const createSubmit = useSubmit(
     useCallback(async () => {
-      const result = await CreateEventExpressRepository({
-        ...toCalendarEvent(formValues),
-      });
+      const result = await CreateEventExpressRepository(
+        CalendarEventMap.fromFormValuesToEntity(formValues)
+      );
 
       if (result.success) {
-        calendarEventDispatch(calendarEventAction.addNewEvent(result.payload));
+        calendarEventDispatch(
+          calendarEventAction.addNewEvent(
+            CalendarEventMap.fromDTOToEntity(result.payload)
+          )
+        );
       }
 
       return result;

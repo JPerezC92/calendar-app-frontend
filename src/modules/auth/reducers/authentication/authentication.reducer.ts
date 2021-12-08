@@ -21,7 +21,6 @@ export const authenticationReducer = (
     case AuthenticationActionEnum.LOGOUT:
       return {
         ...initialAuthenticationState,
-        dispatch: state.dispatch,
       };
     default:
       return state;

@@ -7,10 +7,8 @@ interface FormError<FormValues> {
 }
 
 interface UseForm {
-  <FormValues = Record<string, string>>(values: {
-    [key in keyof FormValues]: string;
-  }): {
-    formValues: typeof values;
+  <FormValues = Record<string, string>>(values: FormValues): {
+    formValues: FormValues;
     formErrors: Record<keyof typeof values, string>;
     handleInputChange(
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

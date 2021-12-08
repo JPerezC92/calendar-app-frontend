@@ -6,7 +6,7 @@ export const DeleteEventExpressRepository: DeleteEventRepository = async (
   calendarEvent
 ) => {
   const response = await fetcher({
-    input: EventApiRoute.DELETE(calendarEvent),
+    input: EventApiRoute.DELETE(calendarEvent.id.toValue() ?? ''),
     init: { method: 'DELETE' },
     withToken: true,
   });

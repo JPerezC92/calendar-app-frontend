@@ -32,14 +32,14 @@ export const calendarEventReducer = (
     case CalendarEventActionEnum.ADD_NEW_EVENT:
       return {
         ...state,
-        events: [...state.events, { ...action.payload }],
+        events: [...state.events, action.payload],
       };
 
     case CalendarEventActionEnum.UPDATE_EVENT:
       return {
         ...state,
         events: state.events.map((event) =>
-          event.id === action.payload.id ? action.payload : event
+          event.equals(action.payload) ? action.payload : event
         ),
       };
 
@@ -47,7 +47,7 @@ export const calendarEventReducer = (
       return {
         ...state,
         events: eventSelected
-          ? state.events.filter((event) => event.id !== eventSelected.id)
+          ? state.events.filter((event) => !event.equals(eventSelected))
           : [...state.events],
         eventSelected: undefined,
       };

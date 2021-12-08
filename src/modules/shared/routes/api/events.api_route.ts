@@ -7,6 +7,8 @@ const EVENTS_ROOT = `${root}events/`;
 export const EventApiRoute = {
   GET_ALL: `${EVENTS_ROOT}`,
   CREATE: `${EVENTS_ROOT}`,
-  UPDATE: (calendarEventId: string) => `${EVENTS_ROOT}${calendarEventId}/`,
-  DELETE: (calendarEventId: string) => `${EVENTS_ROOT}${calendarEventId}/`,
+  UPDATE: (calendarEventId: string | number) =>
+    `${EVENTS_ROOT}${calendarEventId}/`,
+  DELETE: (calendarEventId: string | number) =>
+    `${EVENTS_ROOT}${calendarEventId}/`,
 };
