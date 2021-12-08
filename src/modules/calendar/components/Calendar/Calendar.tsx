@@ -130,9 +130,16 @@ const Calendar: React.FC = () => {
           />
         )}
 
-        <CreateCalendarEventFab onClick={calendarModalState.openModal} />
+        <CreateCalendarEventFab
+          onClick={() => {
+            calendarEventDispatch(calendarEventAction.removeEventSelected());
+            calendarModalState.openModal();
+          }}
+        />
 
-        {calendarModalState.isOpen && <CalendarModal />}
+        {calendarModalState.isOpen && (
+          <CalendarModal calendarEvent={calendarEventState.eventSelected} />
+        )}
       </Box>
     </>
   );

@@ -23,7 +23,6 @@ import Form from 'src/modules/shared/components/Form';
 import { useForm, useSubmit } from 'src/modules/shared/hooks';
 import {
   useCalendarEventDispatch,
-  useCalendarEventState,
   useCalendarModalState,
 } from '../../providers';
 import { CalendarEventFormValues } from '../../types';
@@ -32,7 +31,8 @@ import {
   CreateEventExpressRepository,
   UpdateEventExpressRepository,
 } from '../../repositories';
-import { CalendarEventMap } from '../../core/Mappers/CalendarEventMap';
+import { CalendarEventMap } from '../../core/Mappers';
+import { CalendarEvent } from '../../core/Domain';
 
 const baseDate = parse(
   format(new Date(), 'yyyy-MM-dd HH:00:00'),
@@ -59,16 +59,16 @@ const newCalendarEventInitialState: CalendarEventFormValues = {
   end: initialEndDate,
 };
 
-const CalendarModal: React.FC = () => {
-  const { eventSelected } = useCalendarEventState();
+const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
+  calendarEvent,
+}) => {
   const calendarEventDispatch = useCalendarEventDispatch();
-  const isNewEvent = !eventSelected;
 
   const { formValues, formErrors, setFormValues, handleInputChange } =
     useForm<CalendarEventFormValues>(
-      isNewEvent
-        ? newCalendarEventInitialState
-        : CalendarEventMap.toFormValues(eventSelected)
+      calendarEvent
+        ? CalendarEventMap.toFormValues(calendarEvent)
+        : newCalendarEventInitialState
     );
 
   const { isOpen, closeModal } = useCalendarModalState();
@@ -93,51 +93,47 @@ const CalendarModal: React.FC = () => {
     }
   };
 
-  const updateSubmit = useSubmit(
-    useCallback(async () => {
-      const result = await UpdateEventExpressRepository(
-        CalendarEventMap.fromFormValues(
-          formValues,
-          eventSelected?.id.toString()
+  const createRequest = useCallback(async () => {
+    const result = await UpdateEventExpressRepository(
+      CalendarEventMap.fromFormValues(formValues, calendarEvent?.id.toString())
+    );
+
+    if (result.success) {
+      calendarEventDispatch(
+        calendarEventAction.updateEvent(
+          CalendarEventMap.fromDTO(result.payload)
         )
       );
-      console.log('updated');
+    }
 
-      if (result.success) {
-        calendarEventDispatch(
-          calendarEventAction.updateEvent(
-            CalendarEventMap.fromDTO(result.payload)
-          )
-        );
-      }
+    return result;
+  }, [formValues, calendarEvent, calendarEventDispatch]);
 
-      return result;
-    }, [formValues, eventSelected, calendarEventDispatch])
-  );
+  const updateRequest = useCallback(async () => {
+    const result = await CreateEventExpressRepository(
+      CalendarEventMap.fromFormValues(formValues)
+    );
 
-  const createSubmit = useSubmit(
-    useCallback(async () => {
-      const result = await CreateEventExpressRepository(
-        CalendarEventMap.fromFormValues(formValues)
+    if (result.success) {
+      calendarEventDispatch(
+        calendarEventAction.addNewEvent(
+          CalendarEventMap.fromDTO(result.payload)
+        )
       );
+    }
 
-      if (result.success) {
-        calendarEventDispatch(
-          calendarEventAction.addNewEvent(
-            CalendarEventMap.fromDTO(result.payload)
-          )
-        );
-      }
+    return result;
+  }, [formValues, calendarEventDispatch]);
 
-      return result;
-    }, [formValues, calendarEventDispatch])
+  const [handleSubmit, result, isLoading] = useSubmit(
+    calendarEvent ? createRequest : updateRequest
   );
 
   useEffect(() => {
-    if (createSubmit[1]?.success || updateSubmit[1]?.success) {
+    if (result?.success) {
       closeModal();
     }
-  }, [closeModal, createSubmit, updateSubmit]);
+  }, [closeModal, result]);
 
   useEffect(() => {
     if (parseInt(formValues.end, 10) < parseInt(formValues.start, 10)) {
@@ -159,7 +155,7 @@ const CalendarModal: React.FC = () => {
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            {isNewEvent ? 'Nuevo evento' : formValues.title}
+            {calendarEvent ? formValues.title : 'Nuevo evento'}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
@@ -170,7 +166,7 @@ const CalendarModal: React.FC = () => {
                 flexDirection="column"
                 gridRowGap={3}
                 marginBlock={3}
-                onSubmit={isNewEvent ? createSubmit[0] : updateSubmit[0]}
+                onSubmit={handleSubmit}
               >
                 <FormControl isInvalid={Boolean(formErrors.start)} isRequired>
                   <FormLabel>Fecha y hora inicio</FormLabel>
@@ -241,6 +237,7 @@ const CalendarModal: React.FC = () => {
                   variant="outline"
                   colorScheme="blue"
                   type="submit"
+                  isLoading={isLoading}
                   leftIcon={<FaSave fontSize={20} />}
                 >
                   Guardar
