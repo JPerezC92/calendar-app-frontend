@@ -18,4 +18,8 @@ export class LocalStorageService {
   ): void {
     window.localStorage.setItem(key, JSON.stringify(value));
   }
+
+  static remove(key: keyof LocalStorageItems): void {
+    window.localStorage.removeItem(key);
+  }
 }
