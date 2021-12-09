@@ -58,10 +58,8 @@ export class CalendarEventMap {
   ): CalendarEvent {
     return this.transformDtoToEntity({
       ...calendarEventFormValues,
-      end: new Date(parseInt(calendarEventFormValues.end, 10)).toISOString(),
-      start: new Date(
-        parseInt(calendarEventFormValues.start, 10)
-      ).toISOString(),
+      end: new Date(calendarEventFormValues.end).toISOString(),
+      start: new Date(calendarEventFormValues.start).toISOString(),
       id,
     });
   }
@@ -72,8 +70,8 @@ export class CalendarEventMap {
     return {
       title: calendarEvent.props.title,
       notes: calendarEvent.props.notes,
-      start: new Date(calendarEvent.props.start).getTime().toString(),
-      end: new Date(calendarEvent.props.end).getTime().toString(),
+      start: new Date(calendarEvent.props.start).toISOString(),
+      end: new Date(calendarEvent.props.end).toISOString(),
     };
   }
 

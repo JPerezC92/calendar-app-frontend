@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, useCallback, useEffect } from 'react';
+import { ChangeEventHandler, useCallback, useEffect } from 'react';
 import { Button } from '@chakra-ui/button';
 import {
   FormControl,
@@ -16,7 +16,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/modal';
 import { Textarea } from '@chakra-ui/textarea';
-import { addHours, addMinutes, format, getTime, parse } from 'date-fns';
+import { addHours, addMinutes, format, parse } from 'date-fns';
 import { FaSave } from 'react-icons/fa';
 
 import Form from 'src/modules/shared/components/Form';
@@ -41,8 +41,8 @@ const baseDate = parse(
 );
 
 // Date string in milliseconds
-const initialStartDate = getTime(addHours(baseDate, 1)).toString();
-const initialEndDate = getTime(addHours(baseDate, 2)).toString();
+const initialStartDate = addHours(baseDate, 1).toISOString();
+const initialEndDate = addHours(baseDate, 2).toISOString();
 
 const dateTimeStringToDate = (datetimeString: string): Date => {
   return parse(datetimeString, "yyyy-MM-dd'T'HH:mm", new Date());
@@ -80,7 +80,7 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
 
     if (validity.valid) {
       setFormValues({
-        start: dateTimeStringToDate(value).getTime().toString(),
+        start: dateTimeStringToDate(value).toISOString(),
       });
     }
   };
@@ -89,7 +89,7 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
     const { value, validity } = event.target;
 
     if (validity.valid) {
-      setFormValues({ end: dateTimeStringToDate(value).getTime().toString() });
+      setFormValues({ end: dateTimeStringToDate(value).toISOString() });
     }
   };
 
@@ -130,18 +130,8 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
   );
 
   useEffect(() => {
-    if (result?.success) {
-      closeModal();
-    }
+    if (result?.success) closeModal();
   }, [closeModal, result]);
-
-  useEffect(() => {
-    if (parseInt(formValues.end, 10) < parseInt(formValues.start, 10)) {
-      setFormValues({
-        end: addMinutes(parseInt(formValues.start, 10), 5).getTime().toString(),
-      });
-    }
-  }, [formValues.start, formValues.end, setFormValues]);
 
   useEffect(
     () => () =>
@@ -172,9 +162,8 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
                   <FormLabel>Fecha y hora inicio</FormLabel>
                   <Input
                     name="start"
-                    value={dateToDateTimeString(
-                      new Date(parseInt(formValues.start, 10))
-                    )}
+                    value={dateToDateTimeString(new Date(formValues.start))}
+                    max={dateToDateTimeString(new Date(formValues.end))}
                     isRequired
                     onChange={handleStartDateChange}
                     placeholder="Fecha inicio"
@@ -188,12 +177,10 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
                   <FormLabel>Fecha y hora fin</FormLabel>
                   <Input
                     name="end"
-                    value={dateToDateTimeString(
-                      new Date(parseInt(formValues.end, 10))
-                    )}
+                    value={dateToDateTimeString(new Date(formValues.end))}
                     isRequired
                     min={dateToDateTimeString(
-                      addMinutes(parseInt(formValues.start, 10), 5)
+                      addMinutes(new Date(formValues.start), 5)
                     )}
                     onChange={handleEndDateChange}
                     placeholder="Fecha fin"
@@ -245,13 +232,6 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
               </Form>
             </>
           </ModalBody>
-
-          {/* <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button>
-            <Button variant="ghost">Secondary Action</Button>
-          </ModalFooter> */}
         </ModalContent>
       </Modal>
     </>
