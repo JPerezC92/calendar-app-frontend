@@ -81,6 +81,9 @@ export const AuthenticationStateProvider: React.FC = ({ children }) => {
         tokenInitDate: new Date().toISOString(),
       });
       dispatch(authenticationAction.login(result.payload.user));
+    } else {
+      LocalStorageService.remove('auth');
+      dispatch(authenticationAction.logoout());
     }
   }, [result]);
 

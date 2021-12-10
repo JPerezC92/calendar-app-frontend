@@ -1,72 +1,49 @@
 import { UniqueEntityID } from 'src/modules/shared/Domain';
+import { CalendarEventDto } from '../../DTO';
 import { CalendarEventFormValues } from '../../types';
-import {
-  CalendarEvent,
-  CalendarEventDTO,
-  ReactBigCalendarEvent,
-} from '../Domain';
-
-const sanitize = (object: Record<string, unknown>) => {
-  return Object.fromEntries(
-    Object.entries(object).filter(
-      ([, value]) => typeof value !== 'undefined' && value !== null
-    )
-  );
-};
+import { CalendarEvent, ReactBigCalendarEvent } from '../Domain';
 
 export class CalendarEventMap {
-  public static toDTO(calendarEvent: CalendarEvent): CalendarEventDTO {
+  public static toDTO(calendarEvent: CalendarEvent): CalendarEventDto {
     return {
       id: calendarEvent.id.toValue(),
       notes: calendarEvent.props.notes,
       title: calendarEvent.props.title,
       start: calendarEvent.props.start.toISOString(),
       end: calendarEvent.props.end.toISOString(),
-      userId: calendarEvent.props.userId,
+      user: calendarEvent.props.user,
     };
   }
 
-  private static transformDtoToEntity(
-    calendarEventDTO: CalendarEventDTO
-  ): CalendarEvent {
+  private static transformDtoToEntity({
+    id,
+    ...props
+  }: CalendarEventDto): CalendarEvent {
     return CalendarEvent.create(
       {
-        ...calendarEventDTO,
-        start: new Date(calendarEventDTO.start),
-        end: new Date(calendarEventDTO.end),
-        userId: calendarEventDTO.userId,
+        ...props,
+        start: new Date(props.start),
+        end: new Date(props.end),
       },
-      new UniqueEntityID(calendarEventDTO.id)
+      new UniqueEntityID(id)
     );
   }
 
-  public static fromDTO(calendarEventDTO: CalendarEventDTO): CalendarEvent {
+  public static fromDTO(calendarEventDTO: CalendarEventDto): CalendarEvent {
     return this.transformDtoToEntity(calendarEventDTO);
   }
 
   public static toEntityCollection(
-    calendarEventDTOCollection: CalendarEventDTO[]
+    calendarEventDTOCollection: CalendarEventDto[]
   ): CalendarEvent[] {
     return calendarEventDTOCollection.map((calendarEventDTO) =>
       this.transformDtoToEntity(calendarEventDTO)
     );
   }
 
-  public static fromFormValues(
-    calendarEventFormValues: CalendarEventFormValues,
-    id?: string
-  ): CalendarEvent {
-    return this.transformDtoToEntity({
-      ...calendarEventFormValues,
-      end: new Date(calendarEventFormValues.end).toISOString(),
-      start: new Date(calendarEventFormValues.start).toISOString(),
-      id,
-    });
-  }
-
   public static toFormValues(
     calendarEvent: CalendarEvent
-  ): Omit<CalendarEventDTO, 'id' | 'userId'> {
+  ): CalendarEventFormValues {
     return {
       title: calendarEvent.props.title,
       notes: calendarEvent.props.notes,
@@ -78,14 +55,14 @@ export class CalendarEventMap {
   public static toReactBigCalendarEvent(
     calendarEvent: CalendarEvent
   ): ReactBigCalendarEvent {
-    const { title, notes, start, end, userId } = calendarEvent.props;
+    const { title, notes, start, end, user } = calendarEvent.props;
     return {
       id: calendarEvent.id.toValue(),
       title,
       notes,
       start,
       end,
-      userId,
+      user,
     };
   }
 
@@ -106,13 +83,9 @@ export class CalendarEventMap {
         notes: calendarEvent.notes,
         start: calendarEvent.start,
         end: calendarEvent.end,
-        userId: calendarEvent.userId,
+        user: calendarEvent.user,
       },
       new UniqueEntityID(calendarEvent.id)
     );
-  }
-
-  public static entityToRequest(calendarEvent: CalendarEvent) {
-    return JSON.stringify(sanitize(this.toDTO(calendarEvent)));
   }
 }

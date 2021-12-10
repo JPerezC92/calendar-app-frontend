@@ -1,12 +1,13 @@
 import { EventApiRoute } from 'src/modules/shared/routes/api';
 import { fetcher } from 'src/modules/shared/utils';
-import { CalendarEventMap } from '../core/Mappers/CalendarEventMap';
 import { CreateEventRepository } from '../types/repositories';
 
 export const CreateEventExpressRepository: CreateEventRepository = async (
-  newCalendarEvent
+  newCalendarEventDto
 ) => {
-  const body = CalendarEventMap.entityToRequest(newCalendarEvent);
+  const body = JSON.stringify(newCalendarEventDto);
+  console.log(newCalendarEventDto);
+
   const response = await fetcher({
     input: EventApiRoute.CREATE,
     withToken: true,

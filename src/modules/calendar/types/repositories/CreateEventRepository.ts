@@ -1,8 +1,9 @@
 import { ErrorResponse, SuccessfulResponse } from 'src/modules/shared/types';
-import { CalendarEvent, CalendarEventDTO } from '../../core/Domain';
+import { CalendarEventFormValues } from '..';
+import { CalendarEventDto } from '../../DTO';
 
 export interface CreateEventRepository {
-  (newCalendarEvent: CalendarEvent): Promise<
-    SuccessfulResponse<CalendarEventDTO> | ErrorResponse
+  (newCalendarEvent: CalendarEventFormValues): Promise<
+    SuccessfulResponse<CalendarEventDto> | ErrorResponse
   >;
 }

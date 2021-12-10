@@ -1,6 +1,4 @@
-import { ApiResponse } from '.';
-
-export interface ErrorResponse extends ApiResponse {
+export interface ErrorResponse {
   success: false;
   message: string;
 }

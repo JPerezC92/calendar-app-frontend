@@ -1,7 +1,7 @@
 import { Identifier } from './Identifier';
 
-export class UniqueEntityID extends Identifier<string | undefined> {
-  constructor(id?: string) {
+export class UniqueEntityID extends Identifier<string> {
+  constructor(id: string) {
     super(id);
   }
 }
@@ -13,8 +13,8 @@ const isEntity = (object: unknown): object is Entity => {
 export abstract class Entity {
   protected readonly _id: UniqueEntityID;
 
-  constructor(id?: UniqueEntityID) {
-    this._id = id ? id : new UniqueEntityID();
+  constructor(id: UniqueEntityID) {
+    this._id = id;
   }
 
   public equals(object?: Entity): boolean {

@@ -1,3 +1,3 @@
-import { CalendarEventDTO } from '../core/Domain';
+import { CalendarEventDto } from '../DTO';
 
-export type CalendarEventFormValues = Omit<CalendarEventDTO, 'id' | 'userId'>;
+export type CalendarEventFormValues = Omit<CalendarEventDto, 'id' | 'user'>;

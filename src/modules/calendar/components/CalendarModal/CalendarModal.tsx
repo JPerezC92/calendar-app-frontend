@@ -63,15 +63,13 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
   calendarEvent,
 }) => {
   const calendarEventDispatch = useCalendarEventDispatch();
-
+  const { isOpen, closeModal } = useCalendarModalState();
   const { formValues, formErrors, setFormValues, handleInputChange } =
     useForm<CalendarEventFormValues>(
-      calendarEvent
-        ? CalendarEventMap.toFormValues(calendarEvent)
-        : newCalendarEventInitialState
+      !calendarEvent
+        ? newCalendarEventInitialState
+        : CalendarEventMap.toFormValues(calendarEvent)
     );
-
-  const { isOpen, closeModal } = useCalendarModalState();
 
   const handleStartDateChange: ChangeEventHandler<HTMLInputElement> = (
     event
@@ -93,45 +91,36 @@ const CalendarModal: React.FC<{ calendarEvent?: CalendarEvent }> = ({
     }
   };
 
-  const createRequest = useCallback(async () => {
-    const result = await UpdateEventExpressRepository(
-      CalendarEventMap.fromFormValues(formValues, calendarEvent?.id.toString())
-    );
-
-    if (result.success) {
-      calendarEventDispatch(
-        calendarEventAction.updateEvent(
-          CalendarEventMap.fromDTO(result.payload)
-        )
-      );
-    }
-
-    return result;
-  }, [formValues, calendarEvent, calendarEventDispatch]);
-
-  const updateRequest = useCallback(async () => {
-    const result = await CreateEventExpressRepository(
-      CalendarEventMap.fromFormValues(formValues)
-    );
-
-    if (result.success) {
-      calendarEventDispatch(
-        calendarEventAction.addNewEvent(
-          CalendarEventMap.fromDTO(result.payload)
-        )
-      );
-    }
-
-    return result;
-  }, [formValues, calendarEventDispatch]);
-
   const [handleSubmit, result, isLoading] = useRequestHandler(
-    calendarEvent ? createRequest : updateRequest
+    useCallback(() => {
+      if (!calendarEvent) {
+        return CreateEventExpressRepository({ ...formValues });
+      }
+
+      return UpdateEventExpressRepository({
+        ...formValues,
+        user: calendarEvent?.props.user,
+        id: calendarEvent?.id.toValue(),
+      });
+    }, [calendarEvent, formValues])
   );
 
   useEffect(() => {
-    if (result?.success) closeModal();
-  }, [closeModal, result]);
+    if (result?.success) {
+      const { addNewEvent, updateEvent } = calendarEventAction;
+      if (calendarEvent) {
+        calendarEventDispatch(
+          updateEvent(CalendarEventMap.fromDTO(result.payload))
+        );
+      } else {
+        calendarEventDispatch(
+          addNewEvent(CalendarEventMap.fromDTO(result.payload))
+        );
+      }
+
+      closeModal();
+    }
+  }, [calendarEvent, calendarEventDispatch, closeModal, result]);
 
   useEffect(
     () => () =>

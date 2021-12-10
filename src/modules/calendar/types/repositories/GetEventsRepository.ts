@@ -1,6 +1,6 @@
 import { ErrorResponse, SuccessfulResponse } from 'src/modules/shared/types';
-import { CalendarEventDTO } from '../../core/Domain';
+import { CalendarEventDto } from '../../DTO';
 
 export interface GetEventsRepository {
-  (): Promise<SuccessfulResponse<CalendarEventDTO[]> | ErrorResponse>;
+  (): Promise<SuccessfulResponse<CalendarEventDto[]> | ErrorResponse>;
 }

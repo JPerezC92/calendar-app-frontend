@@ -14,7 +14,7 @@ export interface CalendarEventState {
   eventSelected?: CalendarEvent;
 }
 
-type CalendarEventDispatcher = Dispatch<
+export type CalendarEventDispatcher = Dispatch<
   ReducerAction<typeof calendarEventReducer>
 >;
 
